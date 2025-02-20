@@ -1,0 +1,21 @@
+<odoo>
+    <record id="view_order_form_inherited" model="ir.ui.view">
+        <field name="name">sale.order.form.inherit.project</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <header>
+                <button name="action_create_sale_project" type="object"
+                        string="Create Project" class="btn-primary"/>
+            </header>
+
+            <xpath expr="//field[@name='order_line']/tree" position="inside">
+                <field name="discount_amount" invisible="1"/>
+                <field name="discount_value"/>
+            </xpath>
+
+        </field>
+
+
+    </record>
+</odoo>

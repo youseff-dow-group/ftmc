@@ -1,0 +1,35 @@
+<odoo>
+    <record id="view_task_form_inherit_bom" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.bom</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="after">
+                <group string="BOM INFORMATION" invisible=" not is_new_bom">
+                    <group>
+                        <field name="product_name"/>
+                        <field name="quantity"/>
+                    </group>
+                    <field name="sale_bom_ids">
+                        <tree editable="bottom">
+                            <field name="product_id"/>
+                            <field name="available_qty" readonly="1"/>
+                            <field name="product_cost" readonly="1"/>
+                            <field name="quantity"/>
+                        </tree>
+                    </field>
+                </group>
+
+            </xpath>
+            <field name="tag_ids" position="after">
+
+                <field name="is_new_bom"/>
+
+
+            </field>
+            <xpath expr="//field[@name='personal_stage_type_id']" position="after">
+                <button string="Create New BoM" name="action_create_product_bom" type="object" invisible=" not is_new_bom"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>
