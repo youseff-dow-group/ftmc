@@ -2,8 +2,6 @@ from odoo import models, fields ,api
 
 from odoo.exceptions import ValidationError
 
-from server.odoo.release import product_name
-
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'
