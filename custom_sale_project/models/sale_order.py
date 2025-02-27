@@ -13,12 +13,12 @@ class SaleOrder(models.Model):
                     "Ensure Order lines are filled")
 
             project = self.env['project.project'].create({
-                'name': f" {self.name - self.partner_id.name }",  # Project name = Sale Order name
+                    'name': f"{self.name} - {self.partner_id.name}", 
             })
 
             for line in sale.order_line:
                 self.env['project.task'].create({
-                    'name': line.product_id.name,  # Task name = Product name
+                    'name': line.product_id.name,  
                     'project_id': project.id,
                 })
 
