@@ -26,7 +26,6 @@ class ProjectTask(models.Model):
             product_template = self.env['product.template'].create({
                 'name': task.product_name,
                 'type': 'consu',
-                'project_template_id': False,
             })
 
             bom = self.env['mrp.bom'].create({
