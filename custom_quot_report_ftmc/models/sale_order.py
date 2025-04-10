@@ -75,6 +75,54 @@ class SaleOrder(models.Model):
                 result[relation.category_id.name] = make_details
         return result
 
+    def update_category_make_relations(self):
+        """
+        Update category_make_ids based on product categories in order lines
+        """
+        # Get all unique product categories from order lines
+        categories = set()
+        for line in self.order_line:
+            if line.product_id and line.product_id.categ_id:
+                categories.add(line.product_id.categ_id.id)
+
+        existing_categories = set(relation.category_id.id for relation in self.category_make_ids)
+
+        for category_id in categories:
+            if category_id not in existing_categories:
+                self.env['category.make.relation'].create({
+                    'sale_id': self.id,
+                    'category_id': category_id,
+                    # Default make_ids will be required to be filled by the user
+                })
+
+    def write(self, vals):
+        """Override write method to update category_make_relations when order lines change"""
+        res = super(SaleOrder, self).write(vals)
+        if 'order_line' in vals:
+            self.update_category_make_relations()
+        return res
+
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    @api.model
+    def create(self, vals):
+        """Override create method to update category_make_relations when a new line is created"""
+        line = super(SaleOrderLine, self).create(vals)
+        if line.order_id:
+            line.order_id.update_category_make_relations()
+        return line
+
+    def write(self, vals):
+        """Override write method to update category_make_relations when a line is modified"""
+        res = super(SaleOrderLine, self).write(vals)
+        if 'product_id' in vals and self:
+            for line in self:
+                if line.order_id:
+                    line.order_id.update_category_make_relations()
+        return res
+
 
 class CategoryMakeRelation(models.Model):
     _name = 'category.make.relation'
