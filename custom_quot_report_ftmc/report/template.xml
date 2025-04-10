@@ -1,0 +1,417 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <template id="new_report">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="doc">
+                <t t-call="web.external_layout">
+                    <style>
+                        /* Typography */
+                        .header-arabic {
+                        text-align: right;
+                        direction: rtl;
+                        font-family: Arial;
+                        font-size: 16px;
+                        font-weight: bold;
+                        }
+                        .header-english {
+                        text-align: left;
+                        font-family: Arial;
+                        font-size: 14px;
+                        font-weight: bold;
+                        }
+                        .quotation-title {
+                        text-align: center;
+                        font-weight: bold;
+                        font-size: 18px;
+                        margin-top: 20px;
+                        }
+                        .project-name {
+                        font-weight: bold;
+                        margin: 10px 0;
+                        }
+
+                        /* Tables */
+                        .table-details {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-bottom: 15px;
+                        }
+                        .table-details td {
+                        padding: 3px;
+                        vertical-align: top;
+                        }
+                        .item-table {
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin-top: 15px;
+                        }
+                        .item-table th, .item-table td {
+                        border: 1px solid black;
+                        padding: 5px;
+                        }
+                        .item-table th {
+                        text-align: center;
+                        font-weight: bold;
+                        }
+                        .item-table td {
+                        text-align: left;
+                        }
+                        .item-table .number {
+                        text-align: right;
+                        }
+                        .panel-header {
+                        font-weight: bold;
+                        background-color: #f2f2f2;
+                        }
+
+                        /* Lists and sections */
+                        .terms-list {
+                        margin-top: 15px;
+                        padding-left: 20px;
+                        }
+                        .footer-section {
+                        margin-top: 40px;
+                        }
+                        .signature-left {
+                        float: left;
+                        width: 45%;
+                        }
+                        .signature-right {
+                        float: right;
+                        width: 45%;
+                        text-align: right;
+                        }
+                        .clearfix {
+                        clear: both;
+                        }
+
+                        /* Component makes section */
+                        .make-category {
+                        font-weight: bold;
+                        margin-top: 10px;
+                        }
+                        .make-description {
+                        margin-left: 20px;
+                        margin-bottom: 5px;
+                        }
+
+                        /* Spacing */
+                        .section-margin {
+                        margin-top: 20px;
+                        }
+                        .page-break {
+                        page-break-after: always;
+                        }
+                    </style>
+
+                    <!-- HEADER SECTION -->
+                    <div class="quotation-title">QUOTATION</div>
+
+                    <!-- CLIENT INFORMATION -->
+                    <div>
+                        <strong>Quoted to:</strong>
+                    </div>
+                    <div>
+                        <strong>
+                            <t t-esc="doc.quoted_to"/>
+                        </strong>
+                    </div>
+
+                    <!-- QUOTATION DETAILS -->
+                    <table class="table-details">
+                        <tr>
+                            <td width="50%">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <strong>Quotation No.</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Date</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.date_order"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                            <td width="50%">
+                                <table>
+                                    <tr>
+                                        <td>
+                                            <strong>Tel:</strong>
+                                        </td>
+                                        <td>
+                                            <strong>4235643</strong>
+                                        </td>
+                                        <td>
+                                            <strong>Inquiry No.</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.name"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Mob:</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.name"/>
+                                        </td>
+                                        <td>
+                                            <strong>Inquiry Date</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.date_order" t-options="{'widget': 'date'}"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>Fax:</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.name"/>
+                                        </td>
+                                        <td>
+                                            <strong>Prepared by:</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.prepared_by"/>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <strong>E-mail:</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.name"/>
+                                        </td>
+                                        <td>
+                                            <strong>Inquiry No.</strong>
+                                        </td>
+                                        <td>
+                                            <t t-esc="doc.inquiry_num"/>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <!-- PROJECT INFORMATION -->
+                    <div>
+                        <strong>Attention:</strong>
+                    </div>
+                    <div>
+                        <strong>
+                            <t t-esc="doc.attention"/>
+                        </strong>
+                    </div>
+
+                    <div class="project-name">PROJECT NAME :</div>
+                    <div>
+                        <t t-esc="doc.project_name"/>
+                    </div>
+
+                    <!-- SALUTATION -->
+                    <div class="section-margin">
+                        <strong>Dear Sir:</strong>
+                        <br/>
+                        Reference to your inquiry as stated above, please find our offer as follows:
+                    </div>
+
+                    <!-- CATEGORY SUMMARY TABLE -->
+                    <table class="item-table">
+                        <thead>
+                            <tr>
+                                <th>S.NO.</th>
+                                <th>Item's</th>
+                                <th>QTY</th>
+                                <th>Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="counter" t-value="1"/>
+                            <t t-set="total_amount" t-value="0"/>
+                            <t t-foreach="doc.get_category_summary()" t-as="category">
+                                <tr>
+                                    <td class="number">
+                                        <t t-esc="counter"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="category['name']"/>
+                                        ---SET
+                                    </td>
+                                    <td class="number">
+                                        <t t-esc="category['qty']"/>
+                                    </td>
+                                    <td class="number">
+                                        <t t-esc="category['amount']"
+                                           t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <t t-set="counter" t-value="counter + 1"/>
+                                <t t-set="total_amount" t-value="total_amount + category['amount']"/>
+                            </t>
+
+                            <!-- TOTALS SECTION -->
+                            <tr>
+                                <td colspan="2">
+                                    Amount in words:
+                                    <t t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+                                </td>
+                                <td>
+                                    <strong>Gross Total:</strong>
+                                </td>
+                                <td class="number">
+                                    <t t-esc="total_amount"
+                                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <t t-if="doc.amount_untaxed != doc.amount_total">
+                                <tr>
+                                    <td colspan="3">
+                                        <strong>Discount</strong>
+                                    </td>
+                                    <td class="number">
+                                        <t t-esc="total_amount - doc.amount_total"
+                                           t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                            <tr>
+                                <td colspan="3">
+                                    <strong>Total Amount:</strong>
+                                </td>
+                                <td class="number">
+                                    <t t-esc="doc.amount_total"
+                                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <!-- TERMS AND CONDITIONS -->
+                    <div class="section-margin">
+                        <strong>Terms and conditions:</strong>
+                    </div>
+                    <div>
+                        <t t-esc="doc.note"/>
+                    </div>
+
+                    <!-- MAKE OF COMPONENTS -->
+                    <div class="section-margin">
+                        <strong>MAKE OF COMPONENTS:-</strong>
+                    </div>
+                    <div>L.V. Switchgear components : DORMAN SMITH</div>
+                    <div>Enclosures : ADSF / AL FANAR</div>
+
+                    <!-- COMPANY ADDRESS -->
+                    <div class="section-margin">
+                        Industrial City Abu Dhabi (ICAD)
+                        <br/>
+                        Mussafah,Abu Dhabi, U.A.E.
+                        <br/>
+                        P.O.Box: 70705 Abu Dhabi,U.A.E.
+                    </div>
+
+                    <!-- COMPONENT MAKES DETAILS -->
+                    <div class="section-margin">
+                        <strong>COMPONENT MAKES DETAILS:</strong>
+                    </div>
+                    <t t-set="category_makes_desc" t-value="doc.get_category_makes_with_descriptions()"/>
+                    <t t-foreach="category_makes_desc.items()" t-as="category">
+                        <div class="make-category">
+                            <t t-esc="category[0]"/>:
+                        </div>
+                        <t t-foreach="category[1]" t-as="make">
+                            <div class="make-description">
+                                -
+                                <t t-esc="make['description']"/>
+                            </div>
+                        </t>
+                    </t>
+                    <t t-if="not category_makes_desc">
+                        <div class="make-category">L.V. Switchgear components:</div>
+                        <div class="make-description">- DORMAN SMITH: High quality switchgear components</div>
+                        <div class="make-category">Enclosures:</div>
+                        <div class="make-description">- ADSF / AL FANAR: Premium quality enclosures</div>
+                    </t>
+
+                    <!-- PAGE BREAK -->
+                    <div class="page-break"></div>
+
+                    <!-- DETAILED PRODUCT TABLES BY CATEGORY -->
+                    <t t-set="categories" t-value="doc.get_product_categories()"/>
+                    <t t-foreach="categories.items()" t-as="category">
+                        <table class="item-table section-margin">
+                            <tr class="panel-header">
+                                <td colspan="5">
+                                    <t t-esc="category[0]"/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>S.No.</th>
+                                <th>Item Description</th>
+                                <th>Qty</th>
+                                <th>U/P</th>
+                                <th>T/P</th>
+                            </tr>
+                            <t t-set="counter" t-value="1"/>
+                            <t t-set="category_total" t-value="0"/>
+                            <t t-foreach="category[1]" t-as="line">
+                                <tr>
+                                    <td class="number">
+                                        <t t-esc="counter"/>
+                                    </td>
+                                    <td>
+                                        <t t-esc="line.product_id.name"/>
+                                    </td>
+                                    <td class="number">
+                                        <t t-esc="line.product_uom_qty"/>
+                                    </td>
+                                    <td class="number">
+                                        <t t-esc="line.price_unit"
+                                           t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                    </td>
+                                    <td class="number">
+                                        <t t-esc="line.price_subtotal"
+                                           t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                    </td>
+                                </tr>
+                                <t t-set="counter" t-value="counter + 1"/>
+                                <t t-set="category_total" t-value="category_total + line.price_subtotal"/>
+                            </t>
+                            <tr>
+                                <td colspan="2">
+                                    <strong>TOTAL</strong>
+                                </td>
+                                <td class="number">
+                                    <t t-esc="len(category[1])"/>
+                                </td>
+                                <td></td>
+                                <td class="number">
+                                    <t t-esc="category_total"
+                                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                        </table>
+                    </t>
+
+                    <!-- SIGNATURE SECTION -->
+                    <div class="section-margin">Thank You,</div>
+                    <div>With Regards,</div>
+                    <div>For Abu Dhabi Switchgear Factory LLC</div>
+
+                    <!-- FINAL PAGE BREAK -->
+                    <div class="page-break"></div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>
