@@ -102,6 +102,71 @@ class SaleOrder(models.Model):
             self.update_category_make_relations()
         return res
 
+    def get_mdb_products(self):
+        """
+        Get products that are Main Distribution Boards (MDBs)
+        Returns a list of products that are MDBs
+        """
+        mdb_products = []
+
+        # You can customize this logic based on how you identify MDB products
+        # For example, by category, by name pattern, or by a custom field
+        for line in self.order_line:
+            if line.product_id :
+                mdb_products.append({
+                    'product': line.product_id,
+                    'qty': line.product_uom_qty,
+                    'line': line
+                })
+
+        return mdb_products
+
+    def get_product_bom(self, product_id):
+        """
+        Get the Bill of Materials for a product
+        Returns the BOM record for the given product
+        """
+        BOM = self.env['mrp.bom']
+        bom = BOM.sudo().search([
+            ('product_tmpl_id', '=', product_id.product_tmpl_id.id),
+            ('type', '=', 'normal')
+        ], limit=1)
+
+        return bom
+
+    def get_bom_components_by_category(self, product_id,so_line_qty):
+        """
+        Get BOM components grouped by category for a product
+        Returns a dictionary with category names as keys and lists of components as values
+        """
+        bom = self.get_product_bom(product_id)
+        if not bom:
+            return {}
+
+        components_by_category = defaultdict(list)
+
+        bom_qty = bom.product_qty or 1.0
+
+
+        for line in bom.bom_line_ids:
+            component = line.product_id
+            category_name = component.categ_id.name or "Uncategorized"
+            component_qty = (so_line_qty * line.product_qty) / bom_qty
+
+            components_by_category[category_name].append({
+                'product': component,
+                'qty': component_qty,
+                'uom': line.product_uom_id.name
+            })
+
+        return components_by_category
+
+    def get_total_products_qty(self):
+        """
+        Calculate the total quantity of products in the sale order
+        """
+        return sum(line.product_uom_qty for line in self.order_line)
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
