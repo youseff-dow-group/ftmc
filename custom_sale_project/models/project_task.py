@@ -63,9 +63,9 @@ class ProjectTask(models.Model):
                 'name': task.product_name,
                 'type': 'consu',
                 'list_price': task.total_price,
-                'uom_id': task.product_uom,
-                'uom_po_id': task.product_purchase_uom,
-                'categ_id': task.product_cat,
+                'uom_id': task.product_uom.id,
+                'uom_po_id': task.product_purchase_uom.id,
+                'categ_id': task.product_cat.id,
 
             })
 
