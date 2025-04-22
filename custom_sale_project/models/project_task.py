@@ -2,6 +2,7 @@ from odoo import models, fields ,api
 
 from odoo.exceptions import ValidationError
 
+from jinja2.filters import do_min
 
 
 class ProjectTask(models.Model):
@@ -25,6 +26,9 @@ class ProjectTask(models.Model):
 
     # Link to the created product
     product_id = fields.Many2one('product.template', string="Product", readonly=True)
+    product_uom = fields.Many2one('uom.uom', string="Product Uom")
+    product_purchase_uom = fields.Many2one('uom.uom', string="Purchase Uom")
+    product_cat = fields.Many2one('product.category', string="Product Category")
 
 
     # Smart button for viewing the product
@@ -59,6 +63,9 @@ class ProjectTask(models.Model):
                 'name': task.product_name,
                 'type': 'consu',
                 'list_price': task.total_price,
+                'uom_id': task.product_uom,
+                'uom_po_id': task.product_purchase_uom,
+                'categ_id': task.product_cat,
 
             })
 
@@ -95,6 +102,11 @@ class SaleBOM(models.Model):
     )
 
     discount = fields.Float(string="Discount (%)", default=0.0, help="Discount in percentage")
+    product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', depends=['product_id'])
+
+
+    product_uom = fields.Many2one('uom.uom', string="Product Uom",domain="[('category_id', '=', product_uom_category_id)]")
+
 
     @api.onchange('discount', 'vendor_price')
     def _onchange_discount(self):
