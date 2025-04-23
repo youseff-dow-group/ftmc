@@ -20,6 +20,15 @@
             <field name="binding_model_id" ref="sale.model_sale_order"/>
             <field name="binding_type">report</field>
         </record>
+         <record id="custom_quotation_report_action_new_test" model="ir.actions.report">
+            <field name="name">Custom Technical Quotation Report Test</field>
+            <field name="model">sale.order</field>
+            <field name="report_type">qweb-pdf</field>
+            <field name="report_name">custom_quot_report_ftmc.new_report_technical_report_test</field>
+            <field name="report_file">custom_quot_report_ftmc.new_report_technical_report_test</field>
+            <field name="binding_model_id" ref="sale.model_sale_order"/>
+            <field name="binding_type">report</field>
+        </record>
 
     </data>
 </odoo>
