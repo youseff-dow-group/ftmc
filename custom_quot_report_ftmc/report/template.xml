@@ -113,7 +113,7 @@
                     </div>
                     <div>
                         <strong>
-                            <t t-esc="doc.quoted_to"/>
+                            <t t-esc="doc.partner_id.name"/>
                         </strong>
                     </div>
 
@@ -147,13 +147,13 @@
                                             <strong>Tel:</strong>
                                         </td>
                                         <td>
-                                            <strong>4235643</strong>
+                                            <t t-esc="doc.partner_id.phone"/>
                                         </td>
                                         <td>
                                             <strong>Inquiry No.</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.name"/>
+                                            <t t-esc="doc.inquiry_num"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -161,7 +161,7 @@
                                             <strong>Mob:</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.name"/>
+                                            <t t-esc="doc.partner_id.mobile"/>
                                         </td>
                                         <td>
                                             <strong>Inquiry Date</strong>
@@ -175,7 +175,7 @@
                                             <strong>Fax:</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.name"/>
+                                            <t t-esc="doc.partner_id.phone"/>
                                         </td>
                                         <td>
                                             <strong>Prepared by:</strong>
@@ -189,7 +189,7 @@
                                             <strong>E-mail:</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.name"/>
+                                            <t t-esc="doc.partner_id.email"/>
                                         </td>
                                         <td>
                                             <strong>Inquiry No.</strong>
@@ -326,14 +326,18 @@
                     </div>
                     <t t-set="category_makes_desc" t-value="doc.get_category_makes_with_descriptions()"/>
                     <t t-foreach="category_makes_desc.items()" t-as="category">
+                        <t t-set="note_counter" t-value="1"/>
                         <div class="make-category">
                             <t t-esc="category[0]"/>:
                         </div>
                         <t t-foreach="category[1]" t-as="make">
                             <div class="make-description">
-                                -
+                                <span class="note-number"><t t-esc="note_counter"/>-
+                                </span>
                                 <t t-esc="make['description']"/>
                             </div>
+                            <t t-set="note_counter" t-value="note_counter + 1"/>
+
                         </t>
                     </t>
                     <t t-if="not category_makes_desc">
@@ -659,14 +663,19 @@
                     <div class="section-title">NOTE</div>
                     <t t-set="category_makes_desc" t-value="doc.get_category_makes_with_descriptions()"/>
                     <t t-foreach="category_makes_desc.items()" t-as="category">
+                        <t t-set="note_counter" t-value="1"/>
+
                         <div class="make-category">
                             <t t-esc="category[0]"/>:
                         </div>
                         <t t-foreach="category[1]" t-as="make">
                             <div class="make-description">
-                                -
+                                <span class="note-number"><t t-esc="note_counter"/>-
+                                </span>
                                 <t t-esc="make['description']"/>
                             </div>
+                            <t t-set="note_counter" t-value="note_counter + 1"/>
+
                         </t>
                     </t>
                     <t t-if="not category_makes_desc">
@@ -718,7 +727,7 @@
                                     <t t-foreach="components_by_category.items()" t-as="category">
                                         <!-- Category Header -->
                                         <tr>
-                                             <td class="no-col"></td>
+                                            <td class="no-col"></td>
                                             <td class="h6 desc-col component-section">
                                                 <t t-esc="category[0]"/>
                                             </td>
