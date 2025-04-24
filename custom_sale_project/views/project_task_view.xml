@@ -14,7 +14,7 @@
                     <group>
                         <field name="product_name"/>
                         <field name="product_uom"/>
-                        <field name="product_purchase_uom" />
+                        <field name="product_purchase_uom"/>
                         <field name="product_cat"/>
                         <field name="quantity"/>
                         <field name="margin"/>
@@ -34,8 +34,13 @@
                         </tree>
                     </field>
                 </group>
+                <group>
+                    <field name="total_bom_cost" readonly="1" widget="monetary"
+                           options="{'currency_field': 'company_currency_id'}"/>
+                </group>
 
             </xpath>
+
             <field name="tag_ids" position="after">
                 <field name="is_new_bom"/>
                 <field name="product_id" invisible="1"/>

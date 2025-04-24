@@ -30,6 +30,13 @@ class ProjectTask(models.Model):
     product_purchase_uom = fields.Many2one('uom.uom', string="Purchase Uom")
     product_cat = fields.Many2one('product.category', string="Product Category")
 
+    total_bom_cost = fields.Float(string="Total Cost", compute="_compute_total_bom_cost", store=True)
+
+    @api.depends('sale_bom_ids.line_total')
+    def _compute_total_bom_cost(self):
+        for task in self:
+            task.total_bom_cost = sum(line.line_total for line in task.sale_bom_ids)
+
 
     # Smart button for viewing the product
     def action_view_product(self):
@@ -63,9 +70,9 @@ class ProjectTask(models.Model):
                 'name': task.product_name,
                 'type': 'consu',
                 'list_price': task.total_price,
-                'uom_id': task.product_uom.id,
-                'uom_po_id': task.product_purchase_uom.id,
-                'categ_id': task.product_cat.id,
+                'uom_id': task.product_uom,
+                'uom_po_id': task.product_purchase_uom,
+                'categ_id': task.product_cat,
 
             })
 
@@ -107,6 +114,12 @@ class SaleBOM(models.Model):
 
     product_uom = fields.Many2one('uom.uom', string="Product Uom",domain="[('category_id', '=', product_uom_category_id)]")
 
+    line_total = fields.Float(string="Line Total", compute="_compute_line_total", store=True)
+
+    @api.depends('vendor_price', 'quantity')
+    def _compute_line_total(self):
+        for record in self:
+            record.line_total = record.vendor_price * record.quantity
 
     @api.onchange('discount', 'vendor_price')
     def _onchange_discount(self):
