@@ -10,34 +10,63 @@
                         invisible="not product_id"/>
             </xpath>
             <xpath expr="//sheet/group" position="after">
-                <group string="BOM INFORMATION" invisible=" not is_new_bom">
-                    <group>
-                        <field name="product_name"/>
-                        <field name="product_uom"/>
-                        <field name="product_purchase_uom"/>
-                        <field name="product_cat"/>
-                        <field name="quantity"/>
-                        <field name="margin"/>
-                        <field name="total_price" invisible="1"/>
-                    </group>
-                    <field name="sale_bom_ids">
-                        <tree editable="bottom">
-                            <field name="product_id"/>
+                <form>
+
+                    <group string="BOM INFORMATION" invisible=" not is_new_bom">
+                        <group>
+                            <field name="product_name"/>
                             <field name="product_uom"/>
-                            <field name="product_uom_category_id" column_invisible="1"/>
-                            <field name="vendor_partner"/>
-                            <field name="vendor_price"/>
-                            <field name="discount"/>
-                            <field name="available_vendors" column_invisible="1"/>
-                            <field name="available_qty" readonly="1"/>
-                            <field name="quantity" default="1.00"/>
-                        </tree>
-                    </field>
-                </group>
-                <group>
-                    <field name="total_bom_cost" readonly="1" widget="monetary"
-                           options="{'currency_field': 'company_currency_id'}"/>
-                </group>
+                            <field name="product_purchase_uom"/>
+                            <field name="product_cat"/>
+                            <field name="quantity"/>
+                            <field name="margin"/>
+                            <field name="total_price" invisible="1"/>
+                        </group>
+                        <notebook>
+                            <page string="Bom" name="bom">
+
+                                <field name="sale_bom_ids" widget="section_and_note_one2many"
+                                       mode="tree">
+                                    <tree editable="bottom">
+                                        <control>
+                                            <create name="add_product_control"
+                                                    string="Add a product"/>
+                                            <create name="add_note_control" string="Add a note"
+                                                    context="{'default_display_type': 'line_note'}"/>
+
+                                        </control>
+                                        <field name="sequence" widget="handle"/>
+
+                                        <field name="product_id" create="false"
+                                               required="not display_type=='line_note'"
+                                               delete="false"/>
+                                        <field name="name" widget="section_and_note_text" optional="show"/>
+
+                                        <field name="product_uom"/>
+                                        <field name="product_uom_category_id" column_invisible="1"/>
+                                        <field name="vendor_partner"/>
+                                        <field name="vendor_price"/>
+                                        <field name="discount"/>
+                                        <field name="available_vendors" column_invisible="1"/>
+                                        <field name="available_qty" readonly="1"/>
+                                        <field name="quantity" default="1.00"/>
+                                        <field name="display_type" column_invisible="1"/>
+
+
+                                    </tree>
+                                </field>
+
+                            </page>
+
+                        </notebook>
+                        <group>
+                            <field name="total_bom_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                        </group>
+
+                    </group>
+
+                </form>
 
             </xpath>
 

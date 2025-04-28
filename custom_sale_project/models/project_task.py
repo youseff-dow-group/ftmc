@@ -1,6 +1,6 @@
-from odoo import models, fields ,api
+from odoo import models, fields ,api , _
 
-from odoo.exceptions import ValidationError
+from odoo.exceptions import ValidationError ,UserError
 
 from jinja2.filters import do_min
 
@@ -86,16 +86,19 @@ class ProjectTask(models.Model):
 
             for line in task.sale_bom_ids:
                 self.env['mrp.bom.line'].create({
-                    'bom_id': bom.id,
+                    'bom_id': bom.id ,
                     'product_id': line.product_id.id,
-                    'product_qty': line.quantity,  # Use quantity from Sale BOM
+                    'product_qty': line.quantity ,  # Use quantity from Sale BOM
+                    'display_type': line.display_type ,
+                    'name': line.name,
+                    'sequence': line.sequence,
                 })
 
 class SaleBOM(models.Model):
     _name = 'sale.bom'
 
     task_id = fields.Many2one('project.task', string="Task", ondelete='cascade')
-    product_id = fields.Many2one('product.product', string="Product", required=True)
+    product_id = fields.Many2one('product.product', string='Product', required=False)
     vendor_price = fields.Float(string="Cost",)
     quantity = fields.Float(string="Quantity", default=1.00)
     available_qty = fields.Float(string="Available Quantity", compute="_compute_available_qty", store=True)
@@ -115,6 +118,40 @@ class SaleBOM(models.Model):
     product_uom = fields.Many2one('uom.uom', string="Product Uom",domain="[('category_id', '=', product_uom_category_id)]")
 
     line_total = fields.Float(string="Line Total", compute="_compute_line_total", store=True)
+
+    # Fields specifying custom line logic
+    display_type = fields.Selection(
+        selection=[
+            ('line_section', "Section"),
+            ('line_note', "Note"),
+        ],
+        default=False)
+
+    sequence = fields.Integer(string="Sequence", default=10)
+
+    name = fields.Text(
+        string="Description",
+        readonly=False)
+
+    @api.constrains('display_type', 'product_id')
+    def _check_product_id_required(self):
+        for record in self:
+            if not record.display_type and not record.product_id:
+                raise ValidationError("You must set a Product for regular lines.")
+
+
+    @api.model
+    def create(self, vals_list):
+        if vals_list.get('display_type'):
+            vals_list.update(product_id=False, quantity=0)
+        return super().create(vals_list)
+
+    def write(self, values):
+
+        if'display_type' in values and self.filtered(lambda line: line.display_type != values.get('display_type')):
+            raise UserError(
+                _("You cannot change the type of a warranty order line. Instead you should delete the current line and create a new line of the proper type."))
+        return super().write(values)
 
     @api.depends('vendor_price', 'quantity')
     def _compute_line_total(self):
