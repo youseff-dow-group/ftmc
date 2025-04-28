@@ -629,33 +629,35 @@
                     <div class="section-title">Dear Sir:</div>
                     <div>Reference to your inquiry as stated above, please find our offer as follows:</div>
 
-                    <!-- PRODUCTS TABLE SECTION - Matching the image design -->
+                    <!-- CATEGORY SUMMARY TABLE -->
                     <table class="item-table">
                         <thead>
                             <tr>
-                                <th class="number-col">S.N.</th>
-                                <th class="desc-col">Item Description</th>
-                                <th class="qty-col">Qty</th>
+                                <th>S.NO.</th>
+                                <th>Item's</th>
+                                <th>QTY</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <t t-set="product_counter" t-value="1"/>
-                            <t t-foreach="doc.order_line" t-as="line">
-                                <tr t-if="line.product_id and not line.display_type">
-                                    <td class="number-col">
-                                        <t t-esc="product_counter"/>
+                            <t t-set="counter" t-value="1"/>
+                            <t t-set="total_amount" t-value="0"/>
+                            <t t-foreach="doc.get_category_summary()" t-as="category">
+                                <tr>
+                                    <td class="number">
+                                        <t t-esc="counter"/>
                                     </td>
-                                    <td class="desc-col">
-                                        <t t-esc="line.product_id.name"/>
+                                    <td>
+                                        <t t-esc="category['name']"/>
+                                        ---SET
                                     </td>
-                                    <td class="qty-col">
-                                        <t t-esc="int(line.product_uom_qty) if line.product_uom_qty == int(line.product_uom_qty) else '%.1f' % line.product_uom_qty"/>
+                                    <td class="number">
+                                        <t t-esc="category['qty']"/>
                                     </td>
                                 </tr>
-                                <t t-if="line.product_id and not line.display_type">
-                                    <t t-set="product_counter" t-value="product_counter + 1"/>
-                                </t>
+                                <t t-set="counter" t-value="counter + 1"/>
+                                <t t-set="total_amount" t-value="total_amount + category['amount']"/>
                             </t>
+
                         </tbody>
                     </table>
 
@@ -739,8 +741,12 @@
                                             <tr>
                                                 <td class="no-col"></td>
                                                 <td class="desc-col component-indent">
-                                                    <t t-esc="component['product'].name"/>
+                                                    <t t-if="component['product']" t-esc="component['product'].name"/>
+                                                    <t t-else="" t-esc="component['name']"/>
                                                 </td>
+<!--                                                <td class="desc-col component-indent">-->
+<!--                                                    <t t-esc="component['name']"/>-->
+<!--                                                </td>-->
                                                 <td class="qty-col">
                                                     <t t-esc="int(component['qty']) if component['qty'] == int(component['qty']) else '%.1f' % component['qty']"/>
                                                 </td>

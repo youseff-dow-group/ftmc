@@ -150,13 +150,14 @@ class SaleOrder(models.Model):
 
         for line in bom.bom_line_ids:
             component = line.product_id
-            category_name = component.categ_id.name or "Uncategorized"
+            category_name = component.categ_id.name or ("Note" if line.display_type else "Uncategorized")
             component_qty = (so_line_qty * line.product_qty) / bom_qty
 
             components_by_category[category_name].append({
                 'product': component,
                 'qty': component_qty,
-                'uom': line.product_uom_id.name
+                'uom': line.product_uom_id.name,
+                'name': line.name
             })
 
         return components_by_category
