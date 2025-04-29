@@ -6,6 +6,7 @@ import logging
 
 _logger = logging.getLogger(__name__)
 
+
 class ProjectTask(models.Model):
     _inherit = 'project.task'
 
@@ -33,8 +34,6 @@ class ProjectTask(models.Model):
 
     # Add reference to sale order
     sale_order_id = fields.Many2one('sale.order', string="Sale Order Line", readonly=True)
-
-
 
     @api.depends('name')
     def _compute_product_name(self):
@@ -252,6 +251,32 @@ class SaleBOM(models.Model):
     def _compute_line_total(self):
         for record in self:
             record.line_total = record.vendor_price * record.quantity
+
+    @api.onchange('product_id')
+    def _onchange_product_id(self):
+        """Set the first available vendor when a product is selected."""
+        for record in self:
+            # Reset vendor and price if no product is selected
+            if not record.product_id:
+                record.vendor_partner = False
+                record.vendor_price = 0.0
+                return
+
+            # Compute available vendors
+            sellers = record.product_id.product_tmpl_id.seller_ids
+            record.available_vendors = sellers
+
+            # Set the first vendor if available
+            if sellers:
+                record.vendor_partner = sellers[0].id
+                record.vendor_price = sellers[0].price
+
+                # Set the name from the product if it's empty
+                if not record.name:
+                    record.name = record.product_id.name
+            else:
+                # If no vendors, set price from product standard price
+                record.vendor_price = record.product_id.standard_price
 
     @api.onchange('discount', 'vendor_price')
     def _onchange_discount(self):
