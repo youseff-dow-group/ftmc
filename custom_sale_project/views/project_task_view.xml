@@ -15,6 +15,7 @@
                     <group string="BOM INFORMATION" invisible=" not is_new_bom">
                         <group>
                             <field name="product_name"/>
+                            <field name="sale_order_id" invisible="1"/>
                             <field name="product_uom"/>
                             <field name="product_purchase_uom"/>
                             <field name="product_cat"/>

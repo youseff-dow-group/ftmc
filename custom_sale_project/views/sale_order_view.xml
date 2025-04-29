@@ -28,6 +28,7 @@
             <xpath expr="//field[@name='order_line']/tree" position="inside">
                 <field name="discount_amount" column_invisible="True"/>
                 <field name="discount_value"/>
+                <field name="task_id" column_invisible="1"/>
             </xpath>
 
 
