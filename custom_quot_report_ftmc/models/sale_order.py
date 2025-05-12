@@ -12,7 +12,6 @@ class SaleOrder(models.Model):
 
     category_make_ids = fields.One2many('category.make.relation', 'sale_id', string='Category Makes')
 
-
     def get_product_categories(self):
         """
         Group order lines by product category and return a dictionary

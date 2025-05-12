@@ -424,6 +424,16 @@
                 <t t-call="web.external_layout">
                     <style>
                         /* Capacitor Bank Table Styling - Exact match to the image */
+                        /* MDB Product Row Highlight */
+                        .mdb-product-row {
+                        background-color: #e6f2ff !important; /* Light blue background */
+                        }
+                        .mdb-product-row td {
+                        font-weight: bold;
+                        font-size: 1.1em; /* Slightly larger font */
+                        border-top: 2px solid #4d94ff; /* Blue top border */
+                        border-bottom: 2px solid #4d94ff; /* Blue bottom border */
+                        }
                         .capacitor-table {
                         width: 100%;
                         border-collapse: collapse;
@@ -709,17 +719,36 @@
 
                             <t t-foreach="mdb_products" t-as="mdb">
                                 <!-- MDB Product Row -->
-                                <tr>
+
+                                <tr class="mdb-product-row">
                                     <td class="no-col">
                                         <t t-esc="mdb_counter"/>
                                     </td>
                                     <td class="desc-col">
-                                        <t t-esc="mdb['product'].name"/>
+                                        <span class="product-name">
+                                            <t t-esc="mdb['product'].name"/>
+                                        </span>
+                                        <t t-if="mdb['product'].description_sale">
+                                            <span class="product-description">
+                                                <t t-esc="mdb['product'].description_sale"/>
+                                            </span>
+                                        </t>
                                     </td>
                                     <td class="qty-col">
                                         <t t-esc="mdb['qty']"/>
                                     </td>
                                 </tr>
+                                <!--                                <tr>-->
+                                <!--                                    <td class="no-col">-->
+                                <!--                                        <t t-esc="mdb_counter"/>-->
+                                <!--                                    </td>-->
+                                <!--                                    <td class="desc-col">-->
+                                <!--                                        <t t-esc="mdb['product'].name"/>-->
+                                <!--                                    </td>-->
+                                <!--                                    <td class="qty-col">-->
+                                <!--                                        <t t-esc="mdb['qty']"/>-->
+                                <!--                                    </td>-->
+                                <!--                                </tr>-->
 
 
                                 <!-- BOM Components Section -->
@@ -744,9 +773,9 @@
                                                     <t t-if="component['product']" t-esc="component['product'].name"/>
                                                     <t t-else="" t-esc="component['name']"/>
                                                 </td>
-<!--                                                <td class="desc-col component-indent">-->
-<!--                                                    <t t-esc="component['name']"/>-->
-<!--                                                </td>-->
+                                                <!--                                                <td class="desc-col component-indent">-->
+                                                <!--                                                    <t t-esc="component['name']"/>-->
+                                                <!--                                                </td>-->
                                                 <td class="qty-col">
                                                     <t t-esc="int(component['qty']) if component['qty'] == int(component['qty']) else '%.1f' % component['qty']"/>
                                                 </td>
