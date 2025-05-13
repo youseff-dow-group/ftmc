@@ -375,6 +375,11 @@
                                     </td>
                                     <td>
                                         <t t-esc="line.product_id.name"/>
+                                         <t t-if="line.product_id.description_sale">
+                                            <span class="product-description">
+                                                <t t-esc="line.product_id.description_sale"/>
+                                            </span>
+                                        </t>
                                     </td>
                                     <td class="number">
                                         <t t-esc="line.product_uom_qty"/>
