@@ -8,6 +8,7 @@
         'security/ir.model.access.csv',
         'views/sale_order_view.xml',
         'views/project_task_view.xml',
+        'views/product_product_view.xml',
         'views/account_move_view.xml',
         'views/mrp_bom_view.xml',
     ],

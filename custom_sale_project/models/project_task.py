@@ -44,10 +44,12 @@ class ProjectTask(models.Model):
             else:
                 task.product_name = ''
 
-    @api.depends('sale_bom_ids.line_total')
+    @api.depends('sale_bom_ids.line_total','sale_bom_ids.vendor_price','margin')
     def _compute_total_bom_cost(self):
         for task in self:
-            task.total_bom_cost = sum(line.line_total for line in task.sale_bom_ids)
+            total_bom_cost = sum(line.line_total for line in task.sale_bom_ids)
+            task.total_bom_cost = total_bom_cost + (total_bom_cost * (task.margin / 100))
+
 
     # Smart button for viewing the product
     def action_view_product(self):
@@ -77,11 +79,13 @@ class ProjectTask(models.Model):
                 raise ValidationError(
                     "Conditions not met: Ensure 'Need new BOM' is checked, Sale BOM is filled, and Quantity is positive.")
 
+
+
             # Create product template
             product_template = self.env['product.template'].create({
                 'name': task.product_name,
                 'type': 'consu',
-                'list_price': task.total_price,
+                'list_price': task.total_bom_cost,
                 'uom_id': task.product_uom.id,
                 'uom_po_id': task.product_purchase_uom.id,
                 'categ_id': task.product_cat.id,
