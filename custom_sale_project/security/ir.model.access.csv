@@ -1,2 +1,4 @@
 id,name,model_id/id,group_id/id,perm_read,perm_write,perm_create,perm_unlink
 access_sale_bom,access_sale_bom,model_sale_bom,,1,1,1,1
+access_multiple_product,access.multiple.product,model_multiple_product,base.group_user,1,1,1,1
+

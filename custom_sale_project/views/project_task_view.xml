@@ -16,19 +16,22 @@
                         <group>
                             <field name="product_name"/>
                             <field name="sale_order_id" invisible="1"/>
-                            <field name="product_uom"/>
-                            <field name="product_purchase_uom"/>
-                            <field name="product_cat"/>
+                            <field name="product_uom" readonly="0"/>
+                            <field name="product_purchase_uom" readonly="0"/>
+                            <field name="product_cat" readonly="0"/>
                             <field name="quantity"/>
                             <field name="margin"/>
                             <field name="total_price" invisible="1"/>
                         </group>
                         <notebook>
                             <page string="Bom" name="bom">
-
+                                <button name="%(multiple_product_action_new)d"
+                                        class="oe_highlight" string="Product List" type="action"
+                                />
                                 <field name="sale_bom_ids" widget="section_and_note_one2many"
                                        mode="tree">
                                     <tree editable="bottom">
+
                                         <control>
                                             <create name="add_product_control"
                                                     string="Add a product"/>
@@ -43,20 +46,24 @@
                                                delete="false"/>
                                         <field name="name" widget="section_and_note_text" optional="show"/>
 
-                                        <field name="product_uom"/>
+                                        <field name="product_uom" readonly="0"/>
                                         <field name="product_uom_category_id" column_invisible="1"/>
                                         <field name="vendor_partner"/>
+                                        <field name="cost" optional="hide"
+                                               groups="custom_sale_project.group_see_bom_cost"/>
                                         <field name="vendor_price"/>
-                                        <field name="discount"/>
+                                        <field name="sales_cost" readonly="1"/>
+                                        <field name="discount" optional="show"/>
                                         <field name="available_vendors" column_invisible="1"/>
-                                        <field name="available_qty" readonly="1"/>
+                                        <field name="available_qty" readonly="1" optional="show"/>
                                         <field name="quantity" default="1.00"/>
+                                        <!-- New Total field (Sales Cost * Quantity) -->
+                                        <field name="sales_total" readonly="1" optional="show"/>
                                         <field name="display_type" column_invisible="1"/>
 
 
                                     </tree>
                                 </field>
-
                             </page>
 
                         </notebook>

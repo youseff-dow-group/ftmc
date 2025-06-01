@@ -21,18 +21,47 @@ class SaleOrder(models.Model):
                     "Ensure Order lines are filled")
 
             project = self.env['project.project'].create({
-                'name': f"{self.name} - {self.partner_id.name}",  # Properly formatted string
+                'name': f"{sale.name} - {sale.partner_id.name}",  # Fixed: use sale instead of self
             })
             sale.project_id = project.id
 
             for line in sale.order_line:
+                # Skip lines without products
+                if not line.product_id:
+                    continue
+
+                # Get the product template from the product variant
+                product_template = line.product_id.product_tmpl_id
+
                 project_task = self.env['project.task'].create({
                     'name': line.product_id.name,  # Task name = Product name
                     'project_id': project.id,
-
+                    'product_id': product_template.id,  # Pass the product template ID
+                    'sale_order_id': sale.id,  # Store reference to sale order
                 })
-                project_task.sale_order_id=sale.id
+
+                # Update the sale order line with reference to the task
                 line.task_id = project_task.id
+
+    # def action_create_sale_project(self):
+    #     for sale in self:
+    #         if not sale.order_line:
+    #             raise ValidationError(
+    #                 "Ensure Order lines are filled")
+    #
+    #         project = self.env['project.project'].create({
+    #             'name': f"{self.name} - {self.partner_id.name}",  # Properly formatted string
+    #         })
+    #         sale.project_id = project.id
+    #
+    #         for line in sale.order_line:
+    #             project_task = self.env['project.task'].create({
+    #                 'name': line.product_id.name,  # Task name = Product name
+    #                 'project_id': project.id,
+    #
+    #             })
+    #             project_task.sale_order_id=sale.id
+    #             line.task_id = project_task.id
 
     def action_view_project(self):
         self.ensure_one()

@@ -26,14 +26,49 @@ class ProjectTask(models.Model):
 
     # Link to the created product
     product_id = fields.Many2one('product.template', string="Product", readonly=True)
-    product_uom = fields.Many2one('uom.uom', string="Product Uom")
-    product_purchase_uom = fields.Many2one('uom.uom', string="Purchase Uom")
-    product_cat = fields.Many2one('product.category', string="Product Category")
+    # Modified product_uom to be computed from product's UOM
+    product_uom = fields.Many2one(
+        'uom.uom',
+        string="Product Uom",
+        compute="_compute_product_uoms",
+        store=True,
+        readonly=False,
+        help="Unit of measure from the selected product"
+    )
+
+    # Modified product_purchase_uom to be computed from product's purchase UOM
+    product_purchase_uom = fields.Many2one(
+        'uom.uom',
+        string="Purchase Uom",
+        compute="_compute_product_uoms",
+        store=True,
+        readonly=False,
+        help="Purchase unit of measure from the selected product"
+    )
+    product_cat = fields.Many2one('product.category', compute="_compute_product_uoms",
+        store=True,
+        readonly=False, string="Product Category")
 
     total_bom_cost = fields.Float(string="Total Cost", compute="_compute_total_bom_cost", store=True)
 
     # Add reference to sale order
     sale_order_id = fields.Many2one('sale.order', string="Sale Order Line", readonly=True)
+
+    @api.depends('product_id')
+    def _compute_product_uoms(self):
+        """Compute product UOMs from the selected product's UOMs"""
+        for task in self:
+            if task.product_id:
+                # Set product UOM from product's uom_id
+                task.product_uom = task.product_id.uom_id.id if task.product_id.uom_id else False
+                # Set purchase UOM from product's uom_po_id
+                task.product_purchase_uom = task.product_id.uom_po_id.id if task.product_id.uom_po_id else False
+
+                task.product_cat = task.product_id.categ_id.id if task.product_id.categ_id else False
+            else:
+                task.product_uom = False
+                task.product_purchase_uom = False
+                task.product_cat = False
 
     @api.depends('name')
     def _compute_product_name(self):
@@ -198,11 +233,25 @@ class SaleBOM(models.Model):
 
     task_id = fields.Many2one('project.task', string="Task", ondelete='cascade')
     product_id = fields.Many2one('product.product', string='Product', required=False)
-    vendor_price = fields.Float(string="Cost", )
+    vendor_price = fields.Float(string="Supplier Cost")
+    cost = fields.Float(
+        string="Cost",
+        related='product_id.standard_price',
+        readonly=True,
+        groups="custom_sale_project.group_see_bom_cost",  # Replace 'your_module_name' with your actual module name
+        help="Product standard cost from product profile"
+    )
+    # New sales cost field - the selling price of the product
+    sales_cost = fields.Float(
+        string="Sales Cost",
+        related='product_id.list_price',
+        readonly=True,
+        help="Product sales price from product profile"
+    )
     quantity = fields.Float(string="Quantity", default=1.00)
     available_qty = fields.Float(string="Available Quantity", compute="_compute_available_qty", store=True)
     available_vendors = fields.Many2many(
-        'product.supplierinfo', compute="_compute_available_vendors", store=True
+        'product.supplierinfo', compute="_compute_product_related_data", store=True
     )
 
     vendor_partner = fields.Many2one(
@@ -213,10 +262,20 @@ class SaleBOM(models.Model):
     discount = fields.Float(string="Discount (%)", default=0.0, help="Discount in percentage")
     product_uom_category_id = fields.Many2one(related='product_id.uom_id.category_id', depends=['product_id'])
 
-    product_uom = fields.Many2one('uom.uom', string="Product Uom",
-                                  domain="[('category_id', '=', product_uom_category_id)]")
+    product_uom = fields.Many2one(
+        'uom.uom',
+        string="Product Uom",
+        compute="_compute_product_uom",
+        store=True,
+        readonly=[False],
+        domain="[('category_id', '=', product_uom_category_id)]",
+        help="Unit of measure from the selected product"
+    )
 
     line_total = fields.Float(string="Line Total", compute="_compute_line_total", store=True)
+
+    # New sales total field (Sales Cost * Quantity)
+    sales_total = fields.Float(string="Total", compute="_compute_sales_total", store=True)
 
     # Fields specifying custom line logic
     display_type = fields.Selection(
@@ -231,6 +290,15 @@ class SaleBOM(models.Model):
     name = fields.Text(
         string="Description",
         readonly=False)
+
+    @api.depends('product_id')
+    def _compute_product_uom(self):
+        """Compute product UOM from the selected product's UOM"""
+        for record in self:
+            if record.product_id and record.product_id.uom_id:
+                record.product_uom = record.product_id.uom_id.id
+            else:
+                record.product_uom = False
 
     @api.constrains('display_type', 'product_id')
     def _check_product_id_required(self):
@@ -256,7 +324,13 @@ class SaleBOM(models.Model):
         for record in self:
             record.line_total = record.vendor_price * record.quantity
 
-    @api.onchange('product_id')
+    @api.depends('sales_cost', 'quantity')
+    def _compute_sales_total(self):
+        """Compute sales total: Sales Cost * Quantity"""
+        for record in self:
+            record.sales_total = record.sales_cost * record.quantity
+
+    @api.onchange('product_id','task_id')
     def _onchange_product_id(self):
         """Set the first available vendor when a product is selected."""
         for record in self:
@@ -277,7 +351,7 @@ class SaleBOM(models.Model):
 
                 # Set the name from the product if it's empty
                 if not record.name:
-                    record.name = record.product_id.name
+                    record.name = record.product_id.description_sale
             else:
                 # If no vendors, set price from product standard price
                 record.vendor_price = record.product_id.standard_price
@@ -299,10 +373,46 @@ class SaleBOM(models.Model):
         else:
             self.vendor_price = 0.0  # Reset if no vendor is selected
 
+    @api.depends('product_id', 'task_id')
+    def _compute_product_related_data(self):
+        for record in self:
+            if not record.product_id:
+                record.vendor_partner = False
+                record.vendor_price = 0.0
+                continue
+
+            # Available vendors
+            sellers = record.product_id.product_tmpl_id.seller_ids
+            record.available_vendors = sellers
+
+            # Default to first seller
+            if sellers:
+                record.vendor_partner = sellers[0].id
+                record.vendor_price = sellers[0].price
+            else:
+                record.vendor_price = record.product_id.standard_price
+
+            if not record.name:
+                record.name = record.product_id.description_sale
+
+    @api.depends('vendor_price', 'discount')
+    def _compute_discounted_price(self):
+        for record in self:
+            if record.discount:
+                record.discounted_price = record.vendor_price * (1 - (record.discount / 100))
+            else:
+                record.discounted_price = record.vendor_price
+
+    @api.depends('vendor_partner')
+    def _compute_vendor_price(self):
+        for record in self:
+            record.vendor_price = record.vendor_partner.price if record.vendor_partner else 0.0
+
     @api.depends('product_id')
     def _compute_available_vendors(self):
         """Compute the available suppliers for the selected product."""
         for record in self:
+            print("hellllllllllllllllllllllllll")
             if record.product_id:
                 record.available_vendors = record.product_id.product_tmpl_id.seller_ids
             else:
@@ -316,12 +426,12 @@ class SaleBOM(models.Model):
             view_context = self.env.context
             allowed_companies = view_context.get('allowed_company_ids', False)
 
-            print("Allowed Companies:", len(allowed_companies))
+            print("Allowed Companies:", (allowed_companies))
             print("Allowed Companies d d   d:", self.env.user.company_ids)
             print("Allowed Companies d dsdsdsd   d:", self.env.company)
 
             if record.product_id:
-                if len(allowed_companies) > 1:
+                if allowed_companies and len(allowed_companies) > 1:
 
                     for company in allowed_companies:
                         print("companyyyyy ", company)
