@@ -241,13 +241,6 @@ class SaleBOM(models.Model):
         groups="custom_sale_project.group_see_bom_cost",  # Replace 'your_module_name' with your actual module name
         help="Product standard cost from product profile"
     )
-    # New sales cost field - the selling price of the product
-    sales_cost = fields.Float(
-        string="Sales Cost",
-        related='product_id.list_price',
-        readonly=True,
-        help="Product sales price from product profile"
-    )
     quantity = fields.Float(string="Quantity", default=1.00)
     available_qty = fields.Float(string="Available Quantity", compute="_compute_available_qty", store=True)
     available_vendors = fields.Many2many(
@@ -274,8 +267,6 @@ class SaleBOM(models.Model):
 
     line_total = fields.Float(string="Line Total", compute="_compute_line_total", store=True)
 
-    # New sales total field (Sales Cost * Quantity)
-    sales_total = fields.Float(string="Total", compute="_compute_sales_total", store=True)
 
     # Fields specifying custom line logic
     display_type = fields.Selection(
@@ -324,11 +315,6 @@ class SaleBOM(models.Model):
         for record in self:
             record.line_total = record.vendor_price * record.quantity
 
-    @api.depends('sales_cost', 'quantity')
-    def _compute_sales_total(self):
-        """Compute sales total: Sales Cost * Quantity"""
-        for record in self:
-            record.sales_total = record.sales_cost * record.quantity
 
     @api.onchange('product_id','task_id')
     def _onchange_product_id(self):
