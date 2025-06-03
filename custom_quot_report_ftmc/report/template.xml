@@ -731,6 +731,7 @@
                                     </td>
                                     <td class="desc-col">
                                         <span class="product-name">
+
                                             <t t-esc="mdb['product'].name"/>
                                         </span>
                                         <t t-if="mdb['product'].description_sale">
@@ -776,7 +777,7 @@
                                                 <td class="no-col"></td>
                                                 <td class="desc-col component-indent">
                                                     <t t-if="component['product']" t-esc="component['product'].name"/>
-                                                    <t t-else="" t-esc="component['name']"/>
+                                                    <t t-if="component['name']" t-esc="component['name']"/>
                                                 </td>
                                                 <!--                                                <td class="desc-col component-indent">-->
                                                 <!--                                                    <t t-esc="component['name']"/>-->
