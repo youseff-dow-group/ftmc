@@ -52,7 +52,6 @@
                                         <field name="cost" optional="hide"
                                                groups="custom_sale_project.group_see_bom_cost"/>
                                         <field name="vendor_price"/>
-                                        <field name="sales_cost" readonly="1"/>
                                         <field name="discount" optional="show"/>
                                         <field name="available_vendors" column_invisible="1"/>
                                         <field name="available_qty" readonly="1" optional="show"/>
