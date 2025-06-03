@@ -124,6 +124,7 @@ class ProjectTask(models.Model):
                 'uom_id': task.product_uom.id,
                 'uom_po_id': task.product_purchase_uom.id,
                 'categ_id': task.product_cat.id,
+                'description_sale': task.product_name,
             })
 
             task.product_id = product_template.id
