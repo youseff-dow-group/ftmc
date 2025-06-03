@@ -57,8 +57,7 @@
                                         <field name="available_vendors" column_invisible="1"/>
                                         <field name="available_qty" readonly="1" optional="show"/>
                                         <field name="quantity" default="1.00"/>
-                                        <!-- New Total field (Sales Cost * Quantity) -->
-                                        <field name="sales_total" readonly="1" optional="show"/>
+                                        <field name="line_total"/>
                                         <field name="display_type" column_invisible="1"/>
 
 
