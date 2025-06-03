@@ -37,10 +37,10 @@ class SaleOrder(models.Model):
                     'name': line.product_id.name,  # Task name = Product name
                     'project_id': project.id,
                     'product_id': product_template.id,  # Pass the product template ID
-                    'sale_order_id': sale.id,  # Store reference to sale order
                 })
 
                 # Update the sale order line with reference to the task
+                project_task.sale_order_id=sale.id
                 line.task_id = project_task.id
 
     # def action_create_sale_project(self):

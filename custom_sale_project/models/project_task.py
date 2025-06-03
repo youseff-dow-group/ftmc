@@ -117,7 +117,7 @@ class ProjectTask(models.Model):
 
 
             # Create product template
-            product_template = self.env['product.template'].create({
+            product_template = self.env['product.template'].sudo().create({
                 'name': task.product_name,
                 'type': 'consu',
                 'list_price': task.total_bom_cost,
@@ -129,7 +129,7 @@ class ProjectTask(models.Model):
             task.product_id = product_template.id
 
             # Create BOM
-            bom = self.env['mrp.bom'].create({
+            bom = self.env['mrp.bom'].sudo().create({
                 'product_tmpl_id': product_template.id,
                 'product_qty': task.quantity,
                 'type': 'normal',
@@ -137,7 +137,7 @@ class ProjectTask(models.Model):
 
             # Create BOM lines
             for line in task.sale_bom_ids:
-                self.env['mrp.bom.line'].create({
+                self.env['mrp.bom.line'].sudo().create({
                     'bom_id': bom.id,
                     'product_id': line.product_id.id,
                     'product_qty': line.quantity,  # Use quantity from Sale BOM
@@ -268,6 +268,7 @@ class SaleBOM(models.Model):
     line_total = fields.Float(string="Line Total", compute="_compute_line_total", store=True)
 
 
+
     # Fields specifying custom line logic
     display_type = fields.Selection(
         selection=[
@@ -341,6 +342,7 @@ class SaleBOM(models.Model):
             else:
                 # If no vendors, set price from product standard price
                 record.vendor_price = record.product_id.standard_price
+                record.name = record.product_id.description_sale
 
     @api.onchange('discount', 'vendor_price')
     def _onchange_discount(self):
