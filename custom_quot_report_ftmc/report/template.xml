@@ -153,7 +153,7 @@
                                             <strong>Inquiry No.</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.inquiry_num"/>
+                                            <t t-esc="doc.origin"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -167,7 +167,7 @@
                                             <strong>Inquiry Date</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.date_order" t-options="{'widget': 'date'}"/>
+                                            <t t-esc="doc.inquiry_date" t-options="{'widget': 'date'}"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -181,7 +181,7 @@
                                             <strong>Prepared by:</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.prepared_by"/>
+                                            <t t-esc="doc.prepared_by.name"/>
                                         </td>
                                     </tr>
                                     <tr>
@@ -195,7 +195,7 @@
                                             <strong>Inquiry No.</strong>
                                         </td>
                                         <td>
-                                            <t t-esc="doc.inquiry_num"/>
+                                            <t t-esc="doc.origin"/>
                                         </td>
                                     </tr>
                                 </table>
@@ -209,7 +209,7 @@
                     </div>
                     <div>
                         <strong>
-                            <t t-esc="doc.attention"/>
+<!--                            <t t-if="doc.contact" t-esc="doc.contact.name"/>-->
                         </strong>
                     </div>
 
@@ -375,7 +375,7 @@
                                     </td>
                                     <td>
                                         <t t-esc="line.product_id.name"/>
-                                         <t t-if="line.product_id.description_sale">
+                                        <t t-if="line.product_id.description_sale">
                                             <span class="product-description">
                                                 <t t-esc="line.product_id.description_sale"/>
                                             </span>
@@ -602,7 +602,7 @@
                                 <strong>Inquiry No.</strong>
                             </td>
                             <td>
-                                <t t-esc="doc.inquiry_num"/>
+                                <t t-esc="doc.origin"/>
                             </td>
                         </tr>
                         <tr>
@@ -610,7 +610,7 @@
                                 <strong>Inquiry Date</strong>
                             </td>
                             <td>
-                                <t t-esc="doc.date_order" t-options="{'widget': 'date', 'format': 'dd-MMM-yy'}"/>
+                                <t t-esc="doc.inquiry_date" t-options="{'widget': 'date', 'format': 'dd-MMM-yy'}"/>
                             </td>
                         </tr>
                         <tr>
@@ -618,7 +618,7 @@
                                 <strong>Prepared by:</strong>
                             </td>
                             <td>
-                                <t t-esc="doc.prepared_by"/>
+                                <t t-esc="doc.prepared_by.name"/>
                             </td>
                         </tr>
                         <tr>
@@ -637,7 +637,7 @@
 
                     <div class="section-title">Attention:</div>
                     <div>
-                        <t t-esc="doc.attention"/>
+<!--                        <t t-if="doc.contact" t-esc="doc.contact.name"/>-->
                     </div>
 
                     <!-- SALUTATION -->

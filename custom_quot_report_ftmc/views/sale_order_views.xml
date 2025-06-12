@@ -7,19 +7,7 @@
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
                 <notebook position="inside">
-                    <page string="Quotation Report" name="quotation_report">
-                        <group>
-                            <group>
-                                <field name="quoted_to"/>
-                                <field name="prepared_by"/>
-                            </group>
-                            <group>
-                                <field name="attention"/>
-                                <field name="project_name"/>
-                                <field name="inquiry_num"/>
-                            </group>
-                        </group>
-                    </page>
+
                     <page string="Make Of Component" name="make_of_component">
                         <field name="category_make_ids">
                             <tree>
@@ -35,6 +23,27 @@
                         </field>
                     </page>
                 </notebook>
+                <group name="sale_reporting" position="inside">
+                    <field name="inquiry_date"/>
+                    <field name="prepared_by"/>
+                    <field name="project_name"/>
+                </group>
+                <field name="partner_id" position="after">
+                    <field name="contact_ids" widget="many2many_tags"/>
+                </field>
+<!--                <xpath expr="//group//field[@name='opportunity_id']" position="attributes">-->
+<!--                    <attribute name="string">Opportunity / Project</attribute>-->
+<!--                </xpath>-->
+            </field>
+        </record>
+        <record id="view_order_form_inherit_quotation_report_crm" model="ir.ui.view">
+            <field name="name">sale.order.form.inherit.quotation.report</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale_crm.sale_view_inherit123"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='opportunity_id']" position="attributes">
+                    <attribute name="string">Opportunity / Project</attribute>
+                </xpath>
             </field>
         </record>
     </data>

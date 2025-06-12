@@ -5,7 +5,7 @@
     "license": "LGPL-3",
     "author": "",
     "website": "",
-    "depends": ['sale'],
+    "depends": ['sale','crm','contacts'],
     "data": [
         'security/ir.model.access.csv',
         'views/sale_order_views.xml',

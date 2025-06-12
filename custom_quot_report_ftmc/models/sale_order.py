@@ -4,11 +4,23 @@ from collections import defaultdict
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
     
-    quoted_to = fields.Char(string='Quoted To')
-    prepared_by = fields.Char(string='Prepared By')
-    attention = fields.Char(string='Attention')
+    prepared_by = fields.Many2one('hr.employee',string='Prepared By')
     project_name = fields.Char(string='Project Name')
-    inquiry_num = fields.Char(string='Inquiry Number')
+    inquiry_date  = fields.Date(string="Inquiry Date ")
+    origin = fields.Char(
+        string="Inquiry Number",
+        help="Reference of the document that generated this sales order request"
+    )
+
+    opportunity_id = fields.Many2one(
+        'crm.lead', string='Opportunity / Project', check_company=True,
+        domain="[('type', '=', 'opportunity'), '|', ('company_id', '=', False), ('company_id', '=', company_id)]")
+
+    contact_ids = fields.Many2many(
+        'res.partner',
+        string="Contacts",
+        domain="[('parent_id', '=', partner_id)]"
+    )
 
     category_make_ids = fields.One2many('category.make.relation', 'sale_id', string='Category Makes')
 
