@@ -9,6 +9,8 @@ _logger = logging.getLogger(__name__)
 
 class ProjectTask(models.Model):
     _inherit = 'project.task'
+    _rec_name = 'display_name'
+
 
     product_name = fields.Char(string="Product Name", compute="_compute_product_name", store=True, readonly=False)
 
@@ -53,6 +55,162 @@ class ProjectTask(models.Model):
 
     # Add reference to sale order
     sale_order_id = fields.Many2one('sale.order', string="Sale Order Line", readonly=True)
+
+    # New field: Reference Sales Order (readonly char field)
+    reference_sales_order = fields.Char(
+        string="Reference Sales Order",
+        readonly=True,
+        help="Reference to the original sales order"
+    )
+    # New field: Similar BOM - to copy BOM from another task
+    similar_bom_id = fields.Many2one(
+        'project.task',
+        string="Similar BOM",
+        domain="[('sale_bom_ids', '!=', False), ('id', '!=', id)]",
+        help="Select a task to copy its BOM structure"
+    )
+    # Custom display name combining product name and reference sales order
+    display_name = fields.Char(
+        string="Display Name",
+        compute="_compute_display_name",
+        store=True,
+        help="Display name combining product name and reference sales order"
+    )
+    hour_cost = fields.Float(string="Hour Cost")
+
+
+    over_head_cost = fields.Float(string="Over Head Cost Cost", compute="_compute_over_head_cost", store=True)
+    margin_amount = fields.Float(string="Margin Amount", compute="_compute_margin_amount", store=True)
+
+    component_cost = fields.Float(
+        string="Component Cost",
+        compute="_compute_component_cost",
+        store=True
+    )
+    before_margin = fields.Float(
+        string="Before Margin",
+        compute="_compute_before_margin",
+        store=True
+    )
+    selling_price = fields.Float(
+        string="Selling Price",
+        compute="_compute_selling_price",
+        store=True
+    )
+
+    @api.depends('before_margin', 'margin')
+    def _compute_selling_price(self):
+        for task in self:
+            before_margin = task.before_margin or 0.0
+            margin_percent = task.margin or 0.0
+            task.selling_price = before_margin + (before_margin * margin_percent / 100)
+
+    @api.depends('component_cost', 'over_head_cost')
+    def _compute_before_margin(self):
+        for task in self:
+            task.before_margin = (task.component_cost or 0.0) + (task.over_head_cost or 0.0)
+
+    @api.depends('sale_bom_ids.line_total')
+    def _compute_component_cost(self):
+        for task in self:
+            task.component_cost = sum(line.line_total for line in task.sale_bom_ids)
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None,order=None):
+        args = args or []
+        domain = args + ['|', ('product_name', operator, name), ('reference_sales_order', operator, name)]
+        print("dassssssss",self._search(domain, limit=limit, access_rights_uid=name_get_uid) ,domain)
+        return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
+
+    def name_get(self):
+        result = []
+        for task in self:
+            name = task.display_name or task.name or 'Unnamed Task'
+            result.append((name))
+        return result
+
+    @api.depends('before_margin', 'margin')
+    def _compute_margin_amount(self):
+        for task in self:
+            task.margin_amount = (task.before_margin or 0.0) * (task.margin or 0.0) / 100.0
+
+    @api.depends('sale_bom_ids.installation_hours', 'hour_cost')
+    def _compute_over_head_cost(self):
+        for task in self:
+            total_installation_hours = sum(line.installation_hours for line in task.sale_bom_ids)
+            task.over_head_cost = total_installation_hours  * task.hour_cost
+
+
+
+    # Set the rec_name to use our custom display_name
+    # _rec_names_search = ['display_name']
+
+
+    @api.depends('product_name', 'reference_sales_order', 'name')
+    def _compute_display_name(self):
+        """Compute display name from product name and reference sales order"""
+        for task in self:
+            parts = []
+
+            # Add product name if available
+            if task.product_name:
+                parts.append(task.product_name)
+                print("1111", parts)
+            elif task.name:
+
+                parts.append(task.name)
+                print("22222", parts)
+
+
+            # Add reference sales order if available
+            if task.reference_sales_order:
+                parts.append(f"[{task.reference_sales_order}]")
+                print("3333", parts)
+
+
+            # Join parts with " - " or use default name
+            if parts:
+                task.display_name = " - ".join(parts)
+                print("4444", parts)
+
+            else:
+                print("5555555")
+
+                task.display_name = task.name or "New Task"
+
+    @api.onchange('similar_bom_id')
+    def _onchange_similar_bom_id(self):
+        """Copy BOM lines from the selected similar BOM task"""
+        if self.similar_bom_id and self.similar_bom_id.sale_bom_ids:
+            # Clear existing BOM lines
+            self.sale_bom_ids = [(5, 0, 0)]  # Remove all existing lines
+
+            # Copy BOM lines from the selected task
+            new_lines = []
+            for line in self.similar_bom_id.sale_bom_ids:
+                new_line_vals = {
+                    'product_id': line.product_id.id,
+                    'vendor_price': line.vendor_price,
+                    'quantity': line.quantity,
+                    'vendor_partner': line.vendor_partner.id if line.vendor_partner else False,
+                    'discount': line.discount,
+                    'display_type': line.display_type,
+                    'sequence': line.sequence,
+                    'name': line.name,
+                }
+                new_lines.append((0, 0, new_line_vals))
+
+            self.sale_bom_ids = new_lines
+
+            # Also copy some basic information if not already set
+            if not self.product_cat and self.similar_bom_id.product_cat:
+                self.product_cat = self.similar_bom_id.product_cat.id
+
+            if not self.margin:
+                self.margin = self.similar_bom_id.margin
+
+            # Reset the similar_bom_id field after copying
+            self.similar_bom_id = False
 
     @api.depends('product_id')
     def _compute_product_uoms(self):
@@ -120,7 +278,7 @@ class ProjectTask(models.Model):
             product_template = self.env['product.template'].sudo().create({
                 'name': task.product_name,
                 'type': 'consu',
-                'list_price': task.total_bom_cost,
+                'list_price': task.selling_price,
                 'uom_id': task.product_uom.id,
                 'uom_po_id': task.product_purchase_uom.id,
                 'categ_id': task.product_cat.id,
@@ -284,6 +442,18 @@ class SaleBOM(models.Model):
         string="Description",
         readonly=False)
 
+    installation_hours = fields.Integer(
+        string="Installation Hours",
+        compute="_compute_installation_hours",
+        store=True
+    )
+
+
+    @api.depends('product_id')
+    def _compute_installation_hours(self):
+        for record in self:
+            record.installation_hours = record.product_id.product_tmpl_id.installation_hours or 0
+
     @api.depends('product_id')
     def _compute_product_uom(self):
         """Compute product UOM from the selected product's UOM"""
@@ -331,6 +501,8 @@ class SaleBOM(models.Model):
             # Compute available vendors
             sellers = record.product_id.product_tmpl_id.seller_ids
             record.available_vendors = sellers
+            record.installation_hours = record.product_id.product_tmpl_id.installation_hours or 0
+
 
             # Set the first vendor if available
             if sellers:

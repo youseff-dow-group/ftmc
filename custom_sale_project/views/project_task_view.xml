@@ -15,13 +15,22 @@
                     <group string="BOM INFORMATION" invisible=" not is_new_bom">
                         <group>
                             <field name="product_name"/>
+                            <field name="display_name"/>
+                            <field name="reference_sales_order"/>
+
                             <field name="sale_order_id" invisible="1"/>
                             <field name="product_uom" readonly="0"/>
                             <field name="product_purchase_uom" readonly="0"/>
                             <field name="product_cat" readonly="0"/>
                             <field name="quantity"/>
+                            <field name="hour_cost"/>
                             <field name="margin"/>
                             <field name="total_price" invisible="1"/>
+
+                            <!-- New Similar BOM field -->
+                            <field name="similar_bom_id"
+                                   placeholder="Select a task to copy its BOM..."
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
                         </group>
                         <notebook>
                             <page string="Bom" name="bom">
@@ -52,6 +61,8 @@
                                         <field name="cost" optional="hide"
                                                groups="custom_sale_project.group_see_bom_cost"/>
                                         <field name="vendor_price"/>
+                                                <field name="installation_hours" optional="show"/>
+
                                         <field name="discount" optional="show"/>
                                         <field name="available_vendors" column_invisible="1"/>
                                         <field name="available_qty" readonly="1" optional="show"/>
@@ -66,7 +77,17 @@
 
                         </notebook>
                         <group>
-                            <field name="total_bom_cost" readonly="1" widget="monetary"
+                            <field name="over_head_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                             <field name="total_bom_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="component_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="before_margin" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="margin_amount" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="selling_price" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                         </group>
 
@@ -79,6 +100,7 @@
             <field name="tag_ids" position="after">
                 <field name="is_new_bom"/>
                 <field name="product_id" invisible="1"/>
+
             </field>
             <xpath expr="//field[@name='personal_stage_type_id']" position="after">
                 <button string="Create New BoM" name="action_create_product_bom" type="object"

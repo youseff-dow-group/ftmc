@@ -22,7 +22,7 @@
 
             <header>
                 <button name="action_create_sale_project" type="object"
-                        string="Create Project" class="btn-primary"/>
+                        string="Create Assembly" class="btn-primary"/>
             </header>
 
             <xpath expr="//field[@name='order_line']/tree" position="inside">
