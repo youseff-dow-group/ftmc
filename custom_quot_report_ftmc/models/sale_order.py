@@ -102,14 +102,13 @@ class SaleOrder(models.Model):
                 categories.add(line.product_id.categ_id.id)
         existing_categories = set(relation.category_id.id for relation in self.category_make_ids)
 
-        # for category_id in categories:
-        #     if category_id not in existing_categories:
-        #         self.env['category.make.relation'].create({
-        #             'sale_id': self.id,
-        #             'category_id': category_id,
-        #             'make_ids': [(6, 0, [])]  # empty Many2many safely initialized
-        #             # Default make_ids will be required to be filled by the user
-        #         })
+        for category_id in categories:
+            if category_id not in existing_categories:
+                self.env['category.make.relation'].create({
+                    'sale_id': self.id,
+                    'category_id': category_id,
+                    # Default make_ids will be required to be filled by the user
+                })
 
     def write(self, vals):
         """Override write method to update category_make_relations when order lines change"""
