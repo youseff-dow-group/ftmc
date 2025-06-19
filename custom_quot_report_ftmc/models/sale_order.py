@@ -206,8 +206,8 @@ class CategoryMakeRelation(models.Model):
     _description = 'Product Category and Component Make Relation'
 
     sale_id = fields.Many2one('sale.order', string='Sale Order', ondelete='cascade')
-    category_id = fields.Many2one('product.category', string='Product Category', required=True)
-    make_ids = fields.Many2many('component.make', string='Component Makes', required=True)
+    category_id = fields.Many2one('product.category', string='Product Category',ondelete='cascade', required=True)
+    make_ids = fields.Many2many('component.make', string='Component Makes', ondelete='cascade',required=True)
 
 
     category_name = fields.Char(related='category_id.name', string='Category Name', readonly=True)
