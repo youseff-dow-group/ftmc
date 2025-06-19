@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 from collections import defaultdict
+import logging
+_logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -93,9 +95,11 @@ class SaleOrder(models.Model):
         # Get all unique product categories from order lines
         categories = set()
         for line in self.order_line:
-            if line.product_id and line.product_id.categ_id:
+            if line.product_id:
+                if not line.product_id.categ_id:
+                    _logger.warning(f"Product '{line.product_id.name}' has no category assigned.")
+                    continue
                 categories.add(line.product_id.categ_id.id)
-
         existing_categories = set(relation.category_id.id for relation in self.category_make_ids)
 
         # for category_id in categories:
