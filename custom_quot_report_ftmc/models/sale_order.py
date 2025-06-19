@@ -103,6 +103,7 @@ class SaleOrder(models.Model):
                 self.env['category.make.relation'].create({
                     'sale_id': self.id,
                     'category_id': category_id,
+                    'make_ids': [(6, 0, [])]  # empty Many2many safely initialized
                     # Default make_ids will be required to be filled by the user
                 })
 
@@ -207,7 +208,7 @@ class CategoryMakeRelation(models.Model):
 
     sale_id = fields.Many2one('sale.order', string='Sale Order', ondelete='cascade')
     category_id = fields.Many2one('product.category', string='Product Category',ondelete='cascade', required=True)
-    make_ids = fields.Many2many('component.make', string='Component Makes', ondelete='cascade',required=True)
+    make_ids = fields.Many2many('component.make', string='Component Makes', ondelete='cascade')
 
 
     category_name = fields.Char(related='category_id.name', string='Category Name', readonly=True)
