@@ -5,7 +5,14 @@
     "license": "LGPL-3",
     "author": "",
     "website": "",
-    "depends": ['base','sale','crm','contacts'],
+    "depends": [
+        'base',
+        'sale',
+        'crm',
+        'contacts',
+        'hr',
+        'product',
+    ],
     "data": [
         'security/ir.model.access.csv',
         'views/sale_order_views.xml',
