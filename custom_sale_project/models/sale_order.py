@@ -17,11 +17,10 @@ class SaleOrder(models.Model):
     def action_create_sale_project(self):
         for sale in self:
             if not sale.order_line:
-                raise ValidationError(
-                    "Ensure Order lines are filled")
+                raise ValidationError("Ensure Order lines are filled")
 
             project = self.env['project.project'].create({
-                'name': f"{sale.name} - {sale.partner_id.name}",  # Fixed: use sale instead of self
+                'name': f"{sale.name} - {sale.partner_id.name}",
             })
             sale.project_id = project.id
 
@@ -33,37 +32,28 @@ class SaleOrder(models.Model):
                 # Get the product template from the product variant
                 product_template = line.product_id.product_tmpl_id
 
-                project_task = self.env['project.task'].create({
-                    'name': line.product_id.name,  # Task name = Product name
-                    'project_id': project.id,
-                    'product_id': product_template.id,  # Pass the product template ID
-                    'reference_sales_order': sale.name,  # Set the reference sales order field
+                # Create tasks based on quantity
+                quantity = int(line.product_uom_qty) if line.product_uom_qty > 0 else 1
 
-                })
+                for i in range(quantity):
+                    # Create task name with sequence number if quantity > 1
+                    task_name = line.product_id.name
+                    if quantity > 1:
+                        task_name = f"{line.product_id.name} - {i + 1}"
 
-                # Update the sale order line with reference to the task
-                project_task.sale_order_id=sale.id
-                line.task_id = project_task.id
+                    project_task = self.env['project.task'].create({
+                        'name': task_name,
+                        'project_id': project.id,
+                        'product_id': product_template.id,
+                        'reference_sales_order': sale.name,
+                        'sale_order_id': sale.id,
+                        'sale_order_line_id': line.id,  # Link to specific sale order line
+                        'task_sequence': i + 1,  # Add sequence number for tracking
+                        'total_quantity': quantity,  # Store total quantity for reference
+                    })
+                    project_task.sale_order_id = sale.id
+                    project_task.sale_order_line_id = line.id
 
-    # def action_create_sale_project(self):
-    #     for sale in self:
-    #         if not sale.order_line:
-    #             raise ValidationError(
-    #                 "Ensure Order lines are filled")
-    #
-    #         project = self.env['project.project'].create({
-    #             'name': f"{self.name} - {self.partner_id.name}",  # Properly formatted string
-    #         })
-    #         sale.project_id = project.id
-    #
-    #         for line in sale.order_line:
-    #             project_task = self.env['project.task'].create({
-    #                 'name': line.product_id.name,  # Task name = Product name
-    #                 'project_id': project.id,
-    #
-    #             })
-    #             project_task.sale_order_id=sale.id
-    #             line.task_id = project_task.id
 
     def action_view_project(self):
         self.ensure_one()
@@ -86,24 +76,3 @@ class SaleOrder(models.Model):
             'domain': [('project_id', '=', self.project_id.id)],
             'target': 'current',
         }
-
-
-class SaleOrderLine(models.Model):
-    _inherit = 'sale.order.line'
-    discount_value = fields.Float(string='Discount Amount')
-
-    discount_amount = fields.Float(string="Discount Amount", compute="_compute_discount_amount", store=True)
-
-    task_id = fields.Many2one('project.task', string="Related Tasks")
-
-    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id', 'discount_value')
-    def _compute_discount_amount(self):
-        for line in self:
-            line.discount = (line.discount_value / line.price_unit) * 100 if line.discount_value else 0
-
-    def _prepare_invoice_line(self, **optional_values):
-        res = super()._prepare_invoice_line(**optional_values)
-        res.update({
-            'discount_amount': self.discount_value,
-        })
-        return res

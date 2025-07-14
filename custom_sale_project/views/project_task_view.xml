@@ -15,10 +15,11 @@
                     <group string="BOM INFORMATION" invisible=" not is_new_bom">
                         <group>
                             <field name="product_name"/>
+                            <field name="description_name"/>
                             <field name="display_name"/>
                             <field name="reference_sales_order"/>
-
-                            <field name="sale_order_id" invisible="1"/>
+                            <field name="sale_order_id" invisible="0" readonly="0"/>
+                            <field name="sale_order_line_id" invisible="0" domain="[('order_id', '=', sale_order_id)]"/>
                             <field name="product_uom" readonly="0"/>
                             <field name="product_purchase_uom" readonly="0"/>
                             <field name="product_cat" readonly="0"/>
@@ -26,7 +27,6 @@
                             <field name="hour_cost"/>
                             <field name="margin"/>
                             <field name="total_price" invisible="1"/>
-
                             <!-- New Similar BOM field -->
                             <field name="similar_bom_id"
                                    placeholder="Select a task to copy its BOM..."
@@ -88,6 +88,8 @@
                             <field name="margin_amount" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="selling_price" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="selling_price_with_quantity" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                         </group>
 

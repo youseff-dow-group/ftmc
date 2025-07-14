@@ -11,8 +11,9 @@ class ProjectTask(models.Model):
     _inherit = 'project.task'
     _rec_name = 'display_name'
 
-
     product_name = fields.Char(string="Product Name", compute="_compute_product_name", store=True, readonly=False)
+
+    description_name = fields.Text(string="Description Name", help="Description to be used when creating the product")
 
     quantity = fields.Float(string="Quantity", default=1.00)
 
@@ -48,13 +49,14 @@ class ProjectTask(models.Model):
         help="Purchase unit of measure from the selected product"
     )
     product_cat = fields.Many2one('product.category', compute="_compute_product_uoms",
-        store=True,
-        readonly=False, string="Product Category")
+                                  store=True,
+                                  readonly=False, string="Product Category")
 
     total_bom_cost = fields.Float(string="Total Cost", compute="_compute_total_bom_cost", store=True)
 
-    # Add reference to sale order
-    sale_order_id = fields.Many2one('sale.order', string="Sale Order Line", readonly=True)
+    # Sale order references
+    sale_order_id = fields.Many2one('sale.order', string="Sale Order")
+    sale_order_line_id = fields.Many2one('sale.order.line', string="Sale Order Line")
 
     # New field: Reference Sales Order (readonly char field)
     reference_sales_order = fields.Char(
@@ -78,7 +80,6 @@ class ProjectTask(models.Model):
     )
     hour_cost = fields.Float(string="Hour Cost")
 
-
     over_head_cost = fields.Float(string="Over Head Cost Cost", compute="_compute_over_head_cost", store=True)
     margin_amount = fields.Float(string="Margin Amount", compute="_compute_margin_amount", store=True)
 
@@ -98,6 +99,20 @@ class ProjectTask(models.Model):
         store=True
     )
 
+
+    # New fields for quantity-based task creation
+    task_sequence = fields.Integer(string="Task Sequence", default=1,
+                                   help="Sequence number for tasks created from same sale line")
+    total_quantity = fields.Integer(string="Total Quantity", help="Total quantity from the original sale order line")
+    selling_price_with_quantity = fields.Float(string='Selling Price With Quantity', compute='_compute_selling_price_with_quantity', store=True)
+
+    @api.depends('before_margin','margin','selling_price','quantity')
+    def _compute_selling_price_with_quantity(self):
+        """Compute the value of the field computed_field."""
+        for record in self:
+            if record.selling_price :
+                record.selling_price_with_quantity = (record.selling_price * record.quantity) or 0.0
+
     @api.depends('before_margin', 'margin')
     def _compute_selling_price(self):
         for task in self:
@@ -116,10 +131,10 @@ class ProjectTask(models.Model):
             task.component_cost = sum(line.line_total for line in task.sale_bom_ids)
 
     @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None,order=None):
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
         args = args or []
         domain = args + ['|', ('product_name', operator, name), ('reference_sales_order', operator, name)]
-        print("dassssssss",self._search(domain, limit=limit, access_rights_uid=name_get_uid) ,domain)
+        print("dassssssss", self._search(domain, limit=limit, access_rights_uid=name_get_uid), domain)
         return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
 
     def name_get(self):
@@ -138,45 +153,22 @@ class ProjectTask(models.Model):
     def _compute_over_head_cost(self):
         for task in self:
             total_installation_hours = sum(line.installation_hours for line in task.sale_bom_ids)
-            task.over_head_cost = total_installation_hours  * task.hour_cost
-
-
+            task.over_head_cost = total_installation_hours * task.hour_cost
 
     # Set the rec_name to use our custom display_name
     # _rec_names_search = ['display_name']
 
-
-    @api.depends('product_name', 'reference_sales_order', 'name')
+    @api.depends('product_name', 'reference_sales_order', 'task_sequence', 'total_quantity')
     def _compute_display_name(self):
-        """Compute display name from product name and reference sales order"""
         for task in self:
-            parts = []
-
-            # Add product name if available
+            name_parts = []
             if task.product_name:
-                parts.append(task.product_name)
-                print("1111", parts)
-            elif task.name:
-
-                parts.append(task.name)
-                print("22222", parts)
-
-
-            # Add reference sales order if available
+                name_parts.append(task.product_name)
             if task.reference_sales_order:
-                parts.append(f"[{task.reference_sales_order}]")
-                print("3333", parts)
-
-
-            # Join parts with " - " or use default name
-            if parts:
-                task.display_name = " - ".join(parts)
-                print("4444", parts)
-
-            else:
-                print("5555555")
-
-                task.display_name = task.name or "New Task"
+                name_parts.append(f"[{task.reference_sales_order}]")
+            if task.total_quantity and task.total_quantity > 1:
+                name_parts.append(f"({task.task_sequence}/{task.total_quantity})")
+            task.display_name = " - ".join(name_parts) if name_parts else task.name or "New Task"
 
     @api.onchange('similar_bom_id')
     def _onchange_similar_bom_id(self):
@@ -237,12 +229,11 @@ class ProjectTask(models.Model):
             else:
                 task.product_name = ''
 
-    @api.depends('sale_bom_ids.line_total','sale_bom_ids.vendor_price','margin')
+    @api.depends('sale_bom_ids.line_total', 'sale_bom_ids.vendor_price', 'margin')
     def _compute_total_bom_cost(self):
         for task in self:
             total_bom_cost = sum(line.line_total for line in task.sale_bom_ids)
             task.total_bom_cost = total_bom_cost + (total_bom_cost * (task.margin / 100))
-
 
     # Smart button for viewing the product
     def action_view_product(self):
@@ -272,8 +263,6 @@ class ProjectTask(models.Model):
                 raise ValidationError(
                     "Conditions not met: Ensure 'Need new BOM' is checked, Sale BOM is filled, and Quantity is positive.")
 
-
-
             # Create product template
             product_template = self.env['product.template'].sudo().create({
                 'name': task.product_name,
@@ -282,7 +271,9 @@ class ProjectTask(models.Model):
                 'uom_id': task.product_uom.id,
                 'uom_po_id': task.product_purchase_uom.id,
                 'categ_id': task.product_cat.id,
-                'description_sale': task.product_name,
+                'description_sale': task.description_name or task.product_name,
+                'description': task.description_name,
+
             })
 
             task.product_id = product_template.id
@@ -305,9 +296,6 @@ class ProjectTask(models.Model):
                     'sequence': line.sequence,
                 })
 
-            # Update the product in the sale order line
-            self._update_sale_order_line_product(product_template)
-
             # Return success notification
             return {
                 'type': 'ir.actions.act_window',
@@ -320,68 +308,23 @@ class ProjectTask(models.Model):
             }
 
     def _update_sale_order_line_product(self, product_template):
-        """Update the product in the related sale order line."""
         self.ensure_one()
 
-        # Check if we have a sale order
-        if not self.sale_order_id:
-            _logger.warning(f"No sale order found for task {self.name} (ID: {self.id})")
+        if not self.sale_order_line_id:
+            _logger.warning(f"No sale order line found for task {self.name} (ID: {self.id})")
             return False
 
-        # Find the sale order line that references this task
-        sale_line = self.env['sale.order.line'].search([
-            ('order_id', '=', self.sale_order_id.id),
-            ('task_id', '=', self.id)
-        ], limit=1)
-
-        if sale_line:
-            self._update_sale_line_with_new_product(sale_line, product_template)
-            return True
-
-        # Fallback: try to find by matching name
-        sale_line = self.env['sale.order.line'].search([
-            ('order_id', '=', self.sale_order_id.id),
-            ('name', 'ilike', self.name)
-        ], limit=1)
-
-        if sale_line:
-            self._update_sale_line_with_new_product(sale_line, product_template)
-            return True
-
-        # If still not found, try to find by product name
-        if self.name:
-            sale_line = self.env['sale.order.line'].search([
-                ('order_id', '=', self.sale_order_id.id),
-                ('product_id.name', 'ilike', self.name)
-            ], limit=1)
-
-            if sale_line:
-                self._update_sale_line_with_new_product(sale_line, product_template)
-                return True
-
-        # If no matching line found, log a warning
-        _logger.warning(
-            f"No matching sale order line found for task {self.name} (ID: {self.id}) in sale order {self.sale_order_id.name}")
-        return False
-
-    def _update_sale_line_with_new_product(self, sale_line, product_template):
-        """Update a specific sale order line with the new product."""
-        if not sale_line:
-            return False
-
-        # Get the product.product variant from the template
         product_variant = self.env['product.product'].search(
             [('product_tmpl_id', '=', product_template.id)], limit=1)
 
         if product_variant:
-            # Update the sale order line with the new product
-            sale_line.write({
+            self.sale_order_line_id.write({
                 'product_id': product_variant.id,
                 'name': product_template.name,
                 'price_unit': product_template.list_price,
             })
-            # Log the successful update
-            _logger.info(f"Updated sale order line {sale_line.id} with new product {product_template.name}")
+            _logger.info(
+                f"Updated sale order line {self.sale_order_line_id.id} with new product {product_template.name}")
             return True
 
         return False
@@ -426,8 +369,6 @@ class SaleBOM(models.Model):
 
     line_total = fields.Float(string="Line Total", compute="_compute_line_total", store=True)
 
-
-
     # Fields specifying custom line logic
     display_type = fields.Selection(
         selection=[
@@ -447,7 +388,6 @@ class SaleBOM(models.Model):
         compute="_compute_installation_hours",
         store=True
     )
-
 
     @api.depends('product_id')
     def _compute_installation_hours(self):
@@ -487,8 +427,7 @@ class SaleBOM(models.Model):
         for record in self:
             record.line_total = record.vendor_price * record.quantity
 
-
-    @api.onchange('product_id','task_id')
+    @api.onchange('product_id', 'task_id')
     def _onchange_product_id(self):
         """Set the first available vendor when a product is selected."""
         for record in self:
@@ -502,7 +441,6 @@ class SaleBOM(models.Model):
             sellers = record.product_id.product_tmpl_id.seller_ids
             record.available_vendors = sellers
             record.installation_hours = record.product_id.product_tmpl_id.installation_hours or 0
-
 
             # Set the first vendor if available
             if sellers:
@@ -573,7 +511,6 @@ class SaleBOM(models.Model):
     def _compute_available_vendors(self):
         """Compute the available suppliers for the selected product."""
         for record in self:
-            print("hellllllllllllllllllllllllll")
             if record.product_id:
                 record.available_vendors = record.product_id.product_tmpl_id.seller_ids
             else:
@@ -587,38 +524,24 @@ class SaleBOM(models.Model):
             view_context = self.env.context
             allowed_companies = view_context.get('allowed_company_ids', False)
 
-            print("Allowed Companies:", (allowed_companies))
-            print("Allowed Companies d d   d:", self.env.user.company_ids)
-            print("Allowed Companies d dsdsdsd   d:", self.env.company)
-
             if record.product_id:
                 if allowed_companies and len(allowed_companies) > 1:
-
                     for company in allowed_companies:
-                        print("companyyyyy ", company)
-
                         stock_quant = record.env['stock.quant'].sudo().search(
                             [('product_id', '=', record.product_id.id),
                              ('company_id', '=', company)],
 
                         )
-                        print("stooooooock ", stock_quant)
                         for quant in stock_quant:
                             if quant.quantity > 0.0:
-                                print("stock quanttt", quant.quantity, quant.location_id.location_id.name)
                                 record.available_qty += quant.quantity if quant.quantity else 0.0
                 else:
-                    print("elseee")
-
                     stock_quant = record.env['stock.quant'].search(
                         [('product_id', '=', record.product_id.id), ('company_id', '=', self.env.company.id)
                          ],
                     )
-                    print("elseee سفخؤن", stock_quant)
-
                     for quant in stock_quant:
                         if quant.quantity > 0.0:
-                            print("stock quanttt", quant.quantity, quant.location_id.location_id.name)
                             record.available_qty += quant.quantity if quant.quantity else 0.0
             else:
                 record.available_qty = 0.0
