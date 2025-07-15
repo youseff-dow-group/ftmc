@@ -96,7 +96,7 @@ class SaleOrder(models.Model):
 
                 if related_tasks:
                     # Update quantity based on number of tasks
-                    task_count = len(related_tasks)
+                    task_count = len(task_count)
                     line.product_uom_qty = task_count
 
                     # Calculate average selling price from tasks
