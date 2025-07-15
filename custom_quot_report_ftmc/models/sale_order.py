@@ -1,7 +1,5 @@
 from odoo import models, fields, api
 from collections import defaultdict
-import logging
-_logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -26,18 +24,61 @@ class SaleOrder(models.Model):
 
     category_make_ids = fields.One2many('category.make.relation', 'sale_id', string='Category Makes')
 
-    def get_product_categories(self):
+    def get_product_tasks(self):
         """
-        Group order lines by product category and return a dictionary
-        with category names as keys and lists of order lines as values
+        Group tasks by sale order lines.
+        Returns a list of dictionaries with 'line' and its related 'tasks'.
+        """
+        summary = []
+        categories = self.get_product_orderlines()
+        print("iteeeeeesm ", categories.items())
+        for category_name, entries in categories.items():
+            for entry in entries:
+                tasks = entry['tasks']
+                print("tasks", tasks)
+
+                for task in tasks:
+                    print("task111111111111", task)
+                    summary.append({
+                        'name': task.description_name,
+                        'unit_price': task.selling_price,
+                        'total': task.selling_price_with_quantity
+                    })
+
+        return summary
+
+    def get_product_orderlines(self):
+        """
+        Group order lines by product category.
+        Each value is a list of dictionaries with:
+        - 'lines': the sale order line
+        - 'tasks': list of summarized task info (dicts)
         """
         categories = defaultdict(list)
 
         for line in self.order_line:
-            category_name = line.product_id.categ_id.name or "Uncategorized"
-            categories[category_name].append(line)
+            category_name = line.product_template_id.name or "Uncategorized"
+
+            # Build task summaries
+            task_summaries = []
+            for task in line.task_ids:
+                task_summaries.append({
+                    'name': task.description_name or '',
+                    'quantity': task.quantity or 0.0,
+                    'unit_price': task.selling_price or 0.0,
+                    'total_price': task.selling_price_with_quantity or 0.0,
+                    'total': sum(task.quantity for task in line.task_ids) or 0.0,
+                })
+
+            # Append to category
+            categories[category_name].append({
+                'lines': line,
+                'tasks': task_summaries,
+            })
 
         return categories
+
+
 
     def get_category_summary(self):
         """
@@ -45,17 +86,21 @@ class SaleOrder(models.Model):
         Returns a list of dictionaries with category name, total quantity, and total amount
         """
         summary = []
-        categories = self.get_product_categories()
+        categories = self.get_product_orderlines()
+        print("iteeeeeesm ", categories.items())
+        for category_name, entries in categories.items():
+            for entry in entries:
+                lines = entry['lines']
 
-        for category_name, lines in categories.items():
-            total_qty = sum(line.product_uom_qty for line in lines)
-            total_amount = sum(line.price_subtotal for line in lines)
+                total_qty = sum(line.product_uom_qty for line in lines)
+                total_amount = sum(line.price_subtotal for line in lines)
 
-            summary.append({
-                'name': category_name,
-                'qty': total_qty,
-                'amount': total_amount
-            })
+                summary.append({
+                    'name': category_name,
+                    'qty': total_qty,
+                    'amount': total_amount
+                })
+                print("line", lines)
 
         return summary
 
@@ -95,11 +140,9 @@ class SaleOrder(models.Model):
         # Get all unique product categories from order lines
         categories = set()
         for line in self.order_line:
-            if line.product_id:
-                if not line.product_id.categ_id:
-                    _logger.warning(f"Product '{line.product_id.name}' has no category assigned.")
-                    continue
+            if line.product_id and line.product_id.categ_id:
                 categories.add(line.product_id.categ_id.id)
+
         existing_categories = set(relation.category_id.id for relation in self.category_make_ids)
 
         for category_id in categories:
@@ -210,6 +253,8 @@ class CategoryMakeRelation(models.Model):
     _description = 'Product Category and Component Make Relation'
 
     sale_id = fields.Many2one('sale.order', string='Sale Order', ondelete='cascade')
-    category_id = fields.Many2one('product.category', string='Product Category',ondelete='cascade', required=True)
-    make_ids = fields.Many2many('component.make', string='Component Makes', ondelete='cascade')
+    category_id = fields.Many2one('product.category', string='Product Category', required=True)
+    make_ids = fields.Many2many('component.make', string='Component Makes', required=True)
+
+
     category_name = fields.Char(related='category_id.name', string='Category Name', readonly=True)
