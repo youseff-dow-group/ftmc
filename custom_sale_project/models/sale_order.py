@@ -114,6 +114,10 @@ class SaleOrder(models.Model):
 
                         average_price = total_selling_price / task_count
                         line.price_unit = average_price
+                        _logger.info('Price unittt--------------------------')
+
+                        _logger.info(line.price_unit)
+
                     else:
                         # If no selling price in tasks, keep original price
                         pass
