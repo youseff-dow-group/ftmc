@@ -105,7 +105,7 @@ class SaleOrder(models.Model):
 
 
                     # Calculate average selling price from tasks
-                    total_selling_price = sum(task.selling_price for task in related_tasks if task.selling_price > 0)
+                    total_selling_price = sum(task.selling_price_with_quantity for task in related_tasks if task.selling_price_with_quantity > 0)
 
                     if total_selling_price > 0:
                         _logger.info('0000000000000000')
