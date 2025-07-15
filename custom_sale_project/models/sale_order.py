@@ -1,4 +1,4 @@
-from odoo import models, fields, api
+from odoo import models, fields, api ,_
 
 from odoo.exceptions import ValidationError
 
@@ -76,3 +76,40 @@ class SaleOrder(models.Model):
             'domain': [('project_id', '=', self.project_id.id)],
             'target': 'current',
         }
+
+    def action_update_lines_from_tasks(self):
+        """Update sale order lines based on related tasks quantities and selling prices"""
+        for sale in self:
+            if not sale.project_id:
+                raise ValidationError("No project found. Please create a project first.")
+
+            for line in sale.order_line:
+                # Skip lines without products
+                if not line.product_id:
+                    continue
+
+                # Find all tasks related to this sale order line
+                related_tasks = self.env['project.task'].search([
+                    ('sale_order_line_id', '=', line.id),
+                    ('project_id', '=', sale.project_id.id)
+                ])
+
+                if related_tasks:
+                    # Update quantity based on number of tasks
+                    task_count = len(related_tasks)
+                    line.product_uom_qty = task_count
+
+                    # Calculate average selling price from tasks
+                    total_selling_price = sum(task.selling_price for task in related_tasks if task.selling_price > 0)
+
+                    if total_selling_price > 0:
+                        average_price = total_selling_price / task_count
+                        line.price_unit = average_price
+                    else:
+                        # If no selling price in tasks, keep original price
+                        pass
+
+            return {
+                'type': 'ir.actions.client',
+                'tag': 'reload',
+            }

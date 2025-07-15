@@ -33,6 +33,12 @@
             <header>
                 <button name="action_create_sale_project" type="object"
                         string="Create Assembly" class="btn-primary"/>
+
+                <button name="action_update_lines_from_tasks" type="object"
+                        string="Update Lines from Tasks"
+                        class="btn-secondary"
+                        invisible="project_id == 'False'"
+                        help="Update sale order lines quantity and price based on related tasks"/>
             </header>
 
             <xpath expr="//field[@name='order_line']/tree" position="inside">
