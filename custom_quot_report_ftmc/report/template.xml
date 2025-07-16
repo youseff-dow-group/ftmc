@@ -292,21 +292,6 @@
                         <t t-esc="doc.note"/>
                     </div>
 
-                    <!-- MAKE OF COMPONENTS -->
-                    <div class="section-margin">
-                        <strong>MAKE OF COMPONENTS:-</strong>
-                    </div>
-                    <div>L.V. Switchgear components : DORMAN SMITH</div>
-                    <div>Enclosures : ADSF / AL FANAR</div>
-
-                    <!-- COMPANY ADDRESS -->
-                    <div class="section-margin">
-                        Industrial City Abu Dhabi (ICAD)
-                        <br/>
-                        Mussafah,Abu Dhabi, U.A.E.
-                        <br/>
-                        P.O.Box: 70705 Abu Dhabi,U.A.E.
-                    </div>
 
                     <!-- COMPONENT MAKES DETAILS -->
                     <div class="section-margin">
@@ -734,60 +719,42 @@
 
                                             <t t-esc="mdb['product'].name"/>
                                         </span>
-                                        <t t-if="mdb['product'].description_sale">
-                                            <span class="product-description">
-                                                <t t-esc="mdb['product'].description_sale"/>
-                                            </span>
-                                        </t>
+
                                     </td>
                                     <td class="qty-col">
                                         <t t-esc="mdb['qty']"/>
                                     </td>
                                 </tr>
-                                <!--                                <tr>-->
-                                <!--                                    <td class="no-col">-->
-                                <!--                                        <t t-esc="mdb_counter"/>-->
-                                <!--                                    </td>-->
-                                <!--                                    <td class="desc-col">-->
-                                <!--                                        <t t-esc="mdb['product'].name"/>-->
-                                <!--                                    </td>-->
-                                <!--                                    <td class="qty-col">-->
-                                <!--                                        <t t-esc="mdb['qty']"/>-->
-                                <!--                                    </td>-->
-                                <!--                                </tr>-->
+                                <t t-foreach="mdb['tasks']" t-as="task">
+                                    <t t-set="get_bom_tasks" t-value="doc.get_task_bom_details(task['id'])"/>
 
+                                    <tr>
+                                        <td class="no-col"></td>
+                                        <td class="h6 desc-col component-section">
+                                            <t t-esc="task['name']"/>
 
-                                <!-- BOM Components Section -->
-                                <t t-set="components_by_category"
-                                   t-value="doc.get_bom_components_by_category(mdb['product'], mdb['qty'])"/>
-                                <t t-if="components_by_category">
-                                    <t t-foreach="components_by_category.items()" t-as="category">
-                                        <!-- Category Header -->
-                                        <tr>
-                                            <td class="no-col"></td>
-                                            <td class="h6 desc-col component-section">
-                                                <t t-esc="category[0]"/>
-                                            </td>
-                                            <td class="qty-col"></td>
-                                        </tr>
+                                        </td>
+                                        <td class="qty-col">
+                                            <t t-esc="task['quantity']"/>
 
-                                        <!-- Components -->
-                                        <t t-foreach="category[1]" t-as="component">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <t t-foreach="get_bom_tasks" t-as="bom">
                                             <tr>
                                                 <td class="no-col"></td>
                                                 <td class="desc-col component-indent">
-                                                    <t t-if="component['product']" t-esc="component['product'].name"/>
-                                                    <t t-if="component['name']" t-esc="component['name']"/>
+                                                    <t
+                                                            t-esc="bom['product']"/>
                                                 </td>
-                                                <!--                                                <td class="desc-col component-indent">-->
-                                                <!--                                                    <t t-esc="component['name']"/>-->
-                                                <!--                                                </td>-->
                                                 <td class="qty-col">
-                                                    <t t-esc="int(component['qty']) if component['qty'] == int(component['qty']) else '%.1f' % component['qty']"/>
+                                                    <t t-esc="bom['quantity']"/>
                                                 </td>
                                             </tr>
+
                                         </t>
-                                    </t>
+                                    </tr>
+
                                 </t>
                                 <t t-set="mdb_counter" t-value="mdb_counter + 1"/>
                             </t>

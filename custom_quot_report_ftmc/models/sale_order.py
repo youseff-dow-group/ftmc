@@ -1,5 +1,7 @@
 from odoo import models, fields, api
 from collections import defaultdict
+from odoo.exceptions import UserError, ValidationError
+
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -162,23 +164,33 @@ class SaleOrder(models.Model):
 
     def get_mdb_products(self):
         """
-        Get products that are Main Distribution Boards (MDBs)
-        Returns a list of products that are MDBs
+        Get products that are Main Distribution Boards (MDBs).
+        Returns a list of products (one per sale order line) with their related tasks.
         """
         mdb_products = []
 
-        # You can customize this logic based on how you identify MDB products
-        # For example, by category, by name pattern, or by a custom field
         for line in self.order_line:
-            if line.product_id :
-                mdb_products.append({
-                    'product': line.product_id,
-                    'qty': line.product_uom_qty,
-                    'line': line
+            if not line.product_id:
+                continue
+
+            # Get tasks only related to this line
+            task_summaries = []
+            for task in line.task_ids:
+                task_summaries.append({
+                    'id': task.id,
+                    'name': task.description_name or '',
+                    'quantity': task.quantity or 0.0,
                 })
 
-        return mdb_products
+            mdb_products.append({
+                'product': line.product_id,
+                'qty': line.product_uom_qty,
+                'line': line,
+                'tasks': task_summaries,
+            })
 
+        print("mddddddddddddddddddb", mdb_products)
+        return mdb_products
     def get_product_bom(self, product_id):
         """
         Get the Bill of Materials for a product
@@ -197,6 +209,8 @@ class SaleOrder(models.Model):
         Get BOM components grouped by category for a product
         Returns a dictionary with category names as keys and lists of components as values
         """
+
+
         bom = self.get_product_bom(product_id)
         if not bom:
             return {}
@@ -225,6 +239,29 @@ class SaleOrder(models.Model):
         Calculate the total quantity of products in the sale order
         """
         return sum(line.product_uom_qty for line in self.order_line)
+
+    @api.model
+    def get_task_bom_details(self, task_id):
+        """
+        Get BOM details for a specific task by task_id.
+        Returns a list of key-value dictionaries for each BOM line.
+        """
+        task = self.env['project.task'].browse(task_id)
+        if not task.exists():
+            raise ValidationError(f"Task with ID {task_id} not found.")
+
+        result = []
+        # Sort sale_bom_ids by 'sequence'
+        sorted_bom_lines = task.sale_bom_ids.sorted('sequence')
+
+        for bom_line in sorted_bom_lines:
+            result.append({
+                'product': bom_line.name,
+                'quantity': bom_line.quantity,
+            })
+        print("resasasasasas------", result)
+
+        return result
 
 
 class SaleOrderLine(models.Model):
