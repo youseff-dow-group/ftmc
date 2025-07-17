@@ -177,9 +177,11 @@ class ProjectTask(models.Model):
             # Clear existing BOM lines
             self.sale_bom_ids = [(5, 0, 0)]  # Remove all existing lines
 
+            sorted_lines = sorted(self.similar_bom_id.sale_bom_ids, key=lambda l: l.sequence)
+
             # Copy BOM lines from the selected task
             new_lines = []
-            for line in self.similar_bom_id.sale_bom_ids:
+            for line in sorted_lines:
                 new_line_vals = {
                     'product_id': line.product_id.id,
                     'vendor_price': line.vendor_price,
@@ -191,8 +193,13 @@ class ProjectTask(models.Model):
                     'name': line.name,
                 }
                 new_lines.append((0, 0, new_line_vals))
+            print("new linw", new_lines)
 
             self.sale_bom_ids = new_lines
+
+            self.description_name = self.similar_bom_id.description_name
+
+
 
             # Also copy some basic information if not already set
             if not self.product_cat and self.similar_bom_id.product_cat:
@@ -335,7 +342,7 @@ class SaleBOM(models.Model):
 
     task_id = fields.Many2one('project.task', string="Task", ondelete='cascade')
     product_id = fields.Many2one('product.product', string='Product', required=False)
-    vendor_price = fields.Float(string="Supplier Cost")
+    vendor_price = fields.Float(string="Supplier Cost" , store=True)
     cost = fields.Float(
         string="Cost",
         related='product_id.standard_price',
@@ -452,7 +459,7 @@ class SaleBOM(models.Model):
                     record.name = record.product_id.description_sale
             else:
                 # If no vendors, set price from product standard price
-                record.vendor_price = record.product_id.standard_price
+                # record.vendor_price = record.product_id.standard_price
                 record.name = record.product_id.description_sale
 
     @api.onchange('discount', 'vendor_price')
@@ -469,8 +476,8 @@ class SaleBOM(models.Model):
         """Update vendor price based on selected vendor."""
         if self.vendor_partner:
             self.vendor_price = self.vendor_partner.price  # Fill vendor_price with the selected vendor's price
-        else:
-            self.vendor_price = 0.0  # Reset if no vendor is selected
+        # else:
+        #     self.vendor_price = 0.0  # Reset if no vendor is selected
 
     @api.depends('product_id', 'task_id')
     def _compute_product_related_data(self):
@@ -488,8 +495,8 @@ class SaleBOM(models.Model):
             if sellers:
                 record.vendor_partner = sellers[0].id
                 record.vendor_price = sellers[0].price
-            else:
-                record.vendor_price = record.product_id.standard_price
+            # else:
+            #     record.vendor_price = record.product_id.standard_price
 
             if not record.name:
                 record.name = record.product_id.description_sale
@@ -502,10 +509,10 @@ class SaleBOM(models.Model):
             else:
                 record.discounted_price = record.vendor_price
 
-    @api.depends('vendor_partner')
-    def _compute_vendor_price(self):
-        for record in self:
-            record.vendor_price = record.vendor_partner.price if record.vendor_partner else 0.0
+    # @api.depends('vendor_partner')
+    # def _compute_vendor_price(self):
+    #     for record in self:
+    #         record.vendor_price = record.vendor_partner.price if record.vendor_partner else 0.0
 
     @api.depends('product_id')
     def _compute_available_vendors(self):

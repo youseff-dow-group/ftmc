@@ -1,9 +1,7 @@
 from odoo import models, fields, api ,_
 
 from odoo.exceptions import ValidationError
-import logging
 
-_logger = logging.getLogger(__name__)
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -93,31 +91,20 @@ class SaleOrder(models.Model):
                 # Find all tasks related to this sale order line
                 related_tasks = self.env['project.task'].search([
                     ('sale_order_line_id', '=', line.id),
+                    ('project_id', '=', sale.project_id.id)
                 ])
-
-                _logger.info("Related tasksss------------")
-                _logger.info(related_tasks)
 
                 if related_tasks:
                     # Update quantity based on number of tasks
                     task_count = len(related_tasks)
                     line.product_uom_qty = task_count
 
-
                     # Calculate average selling price from tasks
                     total_selling_price = sum(task.selling_price_with_quantity for task in related_tasks if task.selling_price_with_quantity > 0)
 
                     if total_selling_price > 0:
-                        _logger.info('0000000000000000')
-                        _logger.info(task_count)
-                        _logger.info(total_selling_price)
-
                         average_price = total_selling_price / task_count
                         line.price_unit = average_price
-                        _logger.info('Price unittt--------------------------')
-
-                        _logger.info(line.price_unit)
-
                     else:
                         # If no selling price in tasks, keep original price
                         pass
