@@ -313,12 +313,6 @@
 
                         </t>
                     </t>
-                    <t t-if="not category_makes_desc">
-                        <div class="make-category">L.V. Switchgear components:</div>
-                        <div class="make-description">- DORMAN SMITH: High quality switchgear components</div>
-                        <div class="make-category">Enclosures:</div>
-                        <div class="make-description">- ADSF / AL FANAR: Premium quality enclosures</div>
-                    </t>
 
                     <!-- PAGE BREAK -->
                     <div class="page-break"></div>
@@ -486,37 +480,42 @@
                         border: 1px solid black;
                         }
 
-                        /* Item Table - Matching the image design */
+                        /* Item Table - No Borders */
                         .item-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        margin: 15px 0;
-                        }
-                        .item-table th, .item-table td {
-                        border: 1px solid black;
-                        padding: 5px;
-                        }
-                        .item-table th {
-                        background-color: #f2f2f2;
-                        text-align: center;
-                        font-weight: bold;
-                        }
-                        .item-table td {
-                        text-align: left;
-                        }
-                        .item-table .number-col {
-                        width: 10%;
-                        text-align: center;
-                        }
-                        .item-table .desc-col {
-                        width: 70%;
-                        text-align: center;
-                        }
-                        .item-table .qty-col {
-                        width: 20%;
-                        text-align: center;
+                            width: 100%;
+                            border-collapse: collapse;
+                            margin: 15px 0;
                         }
 
+                        .item-table th, .item-table td {
+                            border: none; /* Remove borders */
+                            padding: 5px;
+                        }
+
+                        .item-table th {
+                            background-color: #f2f2f2;
+                            text-align: center;
+                            font-weight: bold;
+                        }
+
+                        .item-table td {
+                            text-align: left;
+                        }
+
+                        .item-table .number-col {
+                            width: 10%;
+                            text-align: center;
+                        }
+
+                        .item-table .desc-col {
+                            width: 70%;
+                            text-align: center;
+                        }
+
+                        .item-table .qty-col {
+                            width: 20%;
+                            text-align: center;
+                        }
                         /* Notes section */
                         .notes-section {
                         margin-top: 20px;
@@ -680,13 +679,6 @@
 
                         </t>
                     </t>
-                    <t t-if="not category_makes_desc">
-                        <div class="make-category">L.V. Switchgear components:</div>
-                        <div class="make-description">- DORMAN SMITH: High quality switchgear components</div>
-                        <div class="make-category">Enclosures:</div>
-                        <div class="make-description">- ADSF / AL FANAR: Premium quality enclosures</div>
-                    </t>
-
                     <div class="page-break"></div>
 
                     <!-- CAPACITOR BANK TABLE (if needed on a separate page) -->
@@ -694,7 +686,7 @@
                     <div class="section-margin">
                         <strong>MAIN DISTRIBUTION BOARDS (MDBs):</strong>
                     </div>
-                    <table class="item-table">
+                    <table class="table table-borderless">
                         <thead>
                             <tr>
                                 <th class="no-col">No</th>
@@ -716,7 +708,7 @@
                                     </td>
                                     <td class="desc-col">
                                         <span class="product-name">
-
+------
                                             <t t-esc="mdb['product'].name"/>
                                         </span>
 
@@ -732,9 +724,8 @@
                                         <td class="no-col"></td>
                                         <td class="h6 desc-col component-section">
                                             <t t-esc="task['name']"/>
-
                                         </td>
-                                        <td class="qty-col">
+                                        <td  class="qty-col">
                                             <t t-esc="task['quantity']"/>
 
                                         </td>
@@ -743,11 +734,12 @@
                                         <t t-foreach="get_bom_tasks" t-as="bom">
                                             <tr>
                                                 <td class="no-col"></td>
-                                                <td class="desc-col component-indent">
+                                                <td t-attf-class="#{'h6 ' if bom['display_type'] == 'line_note' else ''}desc-col component-indent">
                                                     <t
+
                                                             t-esc="bom['product']"/>
                                                 </td>
-                                                <td class="qty-col">
+                                                <td t-if="bom['display_type'] != 'line_note'" class="qty-col">
                                                     <t t-esc="bom['quantity']"/>
                                                 </td>
                                             </tr>

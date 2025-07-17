@@ -258,6 +258,7 @@ class SaleOrder(models.Model):
             result.append({
                 'product': bom_line.name,
                 'quantity': bom_line.quantity,
+                'display_type': bom_line.display_type,
             })
         print("resasasasasas------", result)
 
