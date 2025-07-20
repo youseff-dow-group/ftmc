@@ -3,6 +3,7 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 
 import logging
+from win32comext.shell.demos.servers.folder_view import tasks
 
 _logger = logging.getLogger(__name__)
 
@@ -23,6 +24,8 @@ class ProjectTask(models.Model):
 
     # Add margin field
     margin = fields.Float(string="Margin (%)", default=0.0)  # Margin in percentage
+
+    discount = fields.Float(string="Discount (%)", default=0.0, help="Discount percentage applied to the total")
 
     # Add total_price field to store computed price with margin
     total_price = fields.Float(string="Total Price", compute="_compute_total_price", store=True)
@@ -99,31 +102,31 @@ class ProjectTask(models.Model):
         store=True
     )
 
-
     # New fields for quantity-based task creation
     task_sequence = fields.Integer(string="Task Sequence", default=1,
                                    help="Sequence number for tasks created from same sale line")
     total_quantity = fields.Integer(string="Total Quantity", help="Total quantity from the original sale order line")
-    selling_price_with_quantity = fields.Float(string='Selling Price With Quantity', compute='_compute_selling_price_with_quantity', store=True)
+    selling_price_with_quantity = fields.Float(string='Selling Price With Quantity',
+                                               compute='_compute_selling_price_with_quantity', store=True)
 
-    @api.depends('before_margin','margin','selling_price','quantity')
+    @api.depends('before_margin', 'margin', 'selling_price', 'quantity', 'discount')
     def _compute_selling_price_with_quantity(self):
         """Compute the value of the field computed_field."""
         for record in self:
-            if record.selling_price :
-                record.selling_price_with_quantity = (record.selling_price * record.quantity) or 0.0
+            if record.selling_price:
+                record.selling_price_with_quantity = (record.selling_price * record.quantity)  or 0.0
 
-    @api.depends('before_margin', 'margin')
+    @api.depends('before_margin', 'margin', 'discount')
     def _compute_selling_price(self):
         for task in self:
             before_margin = task.before_margin or 0.0
             margin_percent = task.margin or 0.0
-            task.selling_price = before_margin + (before_margin * margin_percent / 100)
+            task.selling_price = (before_margin + (before_margin * margin_percent / 100))
 
-    @api.depends('component_cost', 'over_head_cost')
+    @api.depends('component_cost', 'over_head_cost', 'discount')
     def _compute_before_margin(self):
         for task in self:
-            task.before_margin = (task.component_cost or 0.0) + (task.over_head_cost or 0.0)
+            task.before_margin = ((task.component_cost or 0.0) + (task.over_head_cost or 0.0)) * task.discount / 100
 
     @api.depends('sale_bom_ids.line_total')
     def _compute_component_cost(self):
@@ -198,8 +201,6 @@ class ProjectTask(models.Model):
             self.sale_bom_ids = new_lines
 
             self.description_name = self.similar_bom_id.description_name
-
-
 
             # Also copy some basic information if not already set
             if not self.product_cat and self.similar_bom_id.product_cat:
@@ -395,6 +396,9 @@ class SaleBOM(models.Model):
         compute="_compute_installation_hours",
         store=True
     )
+
+    # Add new checkbox field
+    is_selected = fields.Boolean(string="Selected", default=False, help="Check this box to select this BOM line")
 
     @api.depends('product_id')
     def _compute_installation_hours(self):

@@ -90,14 +90,16 @@ class SaleOrder(models.Model):
 
                 # Find all tasks related to this sale order line
                 related_tasks = self.env['project.task'].search([
-                    ('sale_order_line_id', '=', line.id),
-                    ('project_id', '=', sale.project_id.id)
+                    ('sale_order_line_id', '=', line.id)
                 ])
 
                 if related_tasks:
                     # Update quantity based on number of tasks
                     task_count = len(related_tasks)
-                    line.product_uom_qty = task_count
+                    total_quantity = sum(task.quantity for task in related_tasks if task.quantity > 0)
+
+                    line.product_uom_qty = total_quantity
+                    # print("totaaaaaala ", total_quantity)
 
                     # Calculate average selling price from tasks
                     total_selling_price = sum(task.selling_price_with_quantity for task in related_tasks if task.selling_price_with_quantity > 0)

@@ -25,6 +25,7 @@
                             <field name="quantity"/>
                             <field name="hour_cost"/>
                             <field name="margin"/>
+                            <field name="discount"/>
                             <field name="total_price" invisible="1"/>
                             <!-- New Similar BOM field -->
                             <field name="similar_bom_id"
@@ -48,6 +49,8 @@
 
                                         </control>
                                         <field name="sequence" widget="handle"/>
+                                        <field name="is_selected" widget="boolean_toggle"/>
+
 
                                         <field name="product_id" create="false"
                                                required="not display_type=='line_note'"
@@ -60,7 +63,7 @@
                                         <field name="cost" optional="hide"
                                                groups="custom_sale_project.group_see_bom_cost"/>
                                         <field name="vendor_price"/>
-                                                <field name="installation_hours" optional="show"/>
+                                        <field name="installation_hours" optional="show"/>
 
                                         <field name="discount" optional="show"/>
                                         <field name="available_vendors" column_invisible="1"/>
@@ -78,7 +81,7 @@
                         <group>
                             <field name="over_head_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
-                             <field name="total_bom_cost" readonly="1" widget="monetary"
+                            <field name="total_bom_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="component_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
