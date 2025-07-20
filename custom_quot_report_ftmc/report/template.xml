@@ -400,6 +400,9 @@
                         .mdb-product-row {
                         background-color: #e6f2ff !important; /* Light blue background */
                         }
+                        .bom-product-row {
+                        background-color: #d4edda !important; /* Light green background */
+                        }
                         .mdb-product-row td {
                         font-weight: bold;
                         font-size: 1.1em; /* Slightly larger font */
@@ -482,39 +485,39 @@
 
                         /* Item Table - No Borders */
                         .item-table {
-                            width: 100%;
-                            border-collapse: collapse;
-                            margin: 15px 0;
+                        width: 100%;
+                        border-collapse: collapse;
+                        margin: 15px 0;
                         }
 
                         .item-table th, .item-table td {
-                            border: none; /* Remove borders */
-                            padding: 5px;
+                        border: none; /* Remove borders */
+                        padding: 5px;
                         }
 
                         .item-table th {
-                            background-color: #f2f2f2;
-                            text-align: center;
-                            font-weight: bold;
+                        background-color: #f2f2f2;
+                        text-align: center;
+                        font-weight: bold;
                         }
 
                         .item-table td {
-                            text-align: left;
+                        text-align: left;
                         }
 
                         .item-table .number-col {
-                            width: 10%;
-                            text-align: center;
+                        width: 10%;
+                        text-align: center;
                         }
 
                         .item-table .desc-col {
-                            width: 70%;
-                            text-align: center;
+                        width: 70%;
+                        text-align: center;
                         }
 
                         .item-table .qty-col {
-                            width: 20%;
-                            text-align: center;
+                        width: 20%;
+                        text-align: center;
                         }
                         /* Notes section */
                         .notes-section {
@@ -708,7 +711,7 @@
                                     </td>
                                     <td class="desc-col">
                                         <span class="product-name">
-------
+                                            ------
                                             <t t-esc="mdb['product'].name"/>
                                         </span>
 
@@ -720,12 +723,15 @@
                                 <t t-foreach="mdb['tasks']" t-as="task">
                                     <t t-set="get_bom_tasks" t-value="doc.get_task_bom_details(task['id'])"/>
 
-                                    <tr>
+                                    <tr class="bom-product-row">
                                         <td class="no-col"></td>
                                         <td class="h6 desc-col component-section">
                                             <t t-esc="task['name']"/>
+
                                         </td>
-                                        <td  class="qty-col">
+
+
+                                        <td class="qty-col">
                                             <t t-esc="task['quantity']"/>
 
                                         </td>

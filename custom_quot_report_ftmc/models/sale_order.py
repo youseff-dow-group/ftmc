@@ -252,7 +252,7 @@ class SaleOrder(models.Model):
 
         result = []
         # Sort sale_bom_ids by 'sequence'
-        sorted_bom_lines = task.sale_bom_ids.sorted('sequence')
+        sorted_bom_lines = task.sale_bom_ids.sorted('sequence').filtered(lambda l: l.is_selected == False)
 
         for bom_line in sorted_bom_lines:
             result.append({
@@ -260,7 +260,6 @@ class SaleOrder(models.Model):
                 'quantity': bom_line.quantity,
                 'display_type': bom_line.display_type,
             })
-        print("resasasasasas------", result)
 
         return result
 
