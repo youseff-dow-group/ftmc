@@ -3,7 +3,6 @@ from odoo import models, fields, api, _
 from odoo.exceptions import ValidationError, UserError
 
 import logging
-from win32comext.shell.demos.servers.folder_view import tasks
 
 _logger = logging.getLogger(__name__)
 
