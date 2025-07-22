@@ -93,6 +93,10 @@
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="selling_price_with_quantity" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="discount_amount_on_quantity" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="final_price_after_discount" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
                         </group>
 
                     </group>
@@ -112,4 +116,34 @@
             </xpath>
         </field>
     </record>
+
+    <record model="ir.ui.view" id="view_task_tree2_inherited">
+        <field name="name">project.task.form.inherited</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_tree2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_ids']" position="after">
+                <field name="over_head_cost" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="total_bom_cost" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="component_cost" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="before_margin" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="margin_amount" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="selling_price" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="selling_price_with_quantity" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="discount_amount_on_quantity" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="final_price_after_discount" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+
+            </xpath>
+        </field>
+    </record>
+
 </odoo>

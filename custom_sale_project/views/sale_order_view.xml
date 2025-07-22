@@ -46,9 +46,15 @@
                 <field name="discount_value"/>
             </xpath>
 
+            <xpath expr="//group[@name='note_group']/group[@name='sale_total']" position="inside">
+                <field name="total_discount" />
+
+            </xpath>
+
 
         </field>
 
 
     </record>
+
 </odoo>

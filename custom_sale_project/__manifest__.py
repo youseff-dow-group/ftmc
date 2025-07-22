@@ -1,9 +1,8 @@
-
 {
     'name': 'Sale Order Project',
     'version': '1.0',
     'author': 'Ghaith',
-    'depends': ['sale','project'],
+    'depends': ['sale', 'project'],
     'data': [
         'security/ir.model.access.csv',
         'security/groups.xml',
@@ -17,4 +16,3 @@
     'installable': True,
     'application': False,
 }
-

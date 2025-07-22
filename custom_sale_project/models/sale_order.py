@@ -6,8 +6,21 @@ from odoo.exceptions import ValidationError
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
 
+
     project_id = fields.Many2one('project.project', string="Related Project")
     task_count = fields.Integer(string="Tasks Count", compute="_compute_task_count")
+
+    total_discount = fields.Float(string='Total Discount', compute='_compute_total_discount', store=True)
+
+    @api.depends('order_line.discount_value','order_line.discount')
+    def _compute_total_discount(self):
+        """Compute the value of the field total_discount."""
+        for record in self:
+            total_discount = sum(
+                line.discount_value
+                for line in record.order_line
+            )
+            record.total_discount = total_discount
 
     def _compute_task_count(self):
         for order in self:
@@ -102,7 +115,7 @@ class SaleOrder(models.Model):
                     # print("totaaaaaala ", total_quantity)
 
                     # Calculate average selling price from tasks
-                    total_selling_price = sum(task.selling_price_with_quantity for task in related_tasks if task.selling_price_with_quantity > 0)
+                    total_selling_price = sum(task.final_price_after_discount for task in related_tasks if task.final_price_after_discount > 0)
 
                     if total_selling_price > 0:
                         average_price = total_selling_price / task_count
@@ -115,3 +128,4 @@ class SaleOrder(models.Model):
                 'type': 'ir.actions.client',
                 'tag': 'reload',
             }
+

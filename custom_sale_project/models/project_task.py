@@ -108,24 +108,57 @@ class ProjectTask(models.Model):
     selling_price_with_quantity = fields.Float(string='Selling Price With Quantity',
                                                compute='_compute_selling_price_with_quantity', store=True)
 
-    @api.depends('before_margin', 'margin', 'selling_price', 'quantity', 'discount')
+    # New fields for discount calculation
+    discount_amount_on_quantity = fields.Float(
+        string='Discount Amount',
+        compute='_compute_discount_amount_on_quantity',
+        store=True,
+        help="Discount amount calculated on selling price with quantity"
+    )
+
+    final_price_after_discount = fields.Float(
+        string='Final Price After Discount',
+        compute='_compute_final_price_after_discount',
+        store=True,
+        help="Final price after applying discount to selling price with quantity"
+    )
+
+    @api.depends('selling_price_with_quantity', 'discount')
+    def _compute_discount_amount_on_quantity(self):
+        """Calculate the discount amount based on selling_price_with_quantity and discount percentage."""
+        for record in self:
+            selling_price_qty = record.selling_price_with_quantity or 0.0
+            discount_percent = record.discount or 0.0
+            record.discount_amount_on_quantity = selling_price_qty * (discount_percent / 100)
+
+    @api.depends('selling_price_with_quantity', 'discount_amount_on_quantity')
+    def _compute_final_price_after_discount(self):
+        """Calculate the final price after applying discount."""
+        for record in self:
+            selling_price_qty = record.selling_price_with_quantity or 0.0
+            discount_amount = record.discount_amount_on_quantity or 0.0
+            record.final_price_after_discount = selling_price_qty - discount_amount
+
+
+
+    @api.depends('before_margin', 'margin', 'selling_price', 'quantity')
     def _compute_selling_price_with_quantity(self):
         """Compute the value of the field computed_field."""
         for record in self:
             if record.selling_price:
                 record.selling_price_with_quantity = (record.selling_price * record.quantity)  or 0.0
 
-    @api.depends('before_margin', 'margin', 'discount')
+    @api.depends('before_margin', 'margin')
     def _compute_selling_price(self):
         for task in self:
             before_margin = task.before_margin or 0.0
             margin_percent = task.margin or 0.0
             task.selling_price = (before_margin + (before_margin * margin_percent / 100))
 
-    @api.depends('component_cost', 'over_head_cost', 'discount')
+    @api.depends('component_cost', 'over_head_cost')
     def _compute_before_margin(self):
         for task in self:
-            task.before_margin = ((task.component_cost or 0.0) + (task.over_head_cost or 0.0)) * task.discount / 100
+            task.before_margin = (task.component_cost or 0.0) + (task.over_head_cost or 0.0)
 
     @api.depends('sale_bom_ids.line_total')
     def _compute_component_cost(self):
@@ -274,7 +307,7 @@ class ProjectTask(models.Model):
             product_template = self.env['product.template'].sudo().create({
                 'name': task.product_name,
                 'type': 'consu',
-                'list_price': task.selling_price,
+                'list_price': task.final_price_after_discount,
                 'uom_id': task.product_uom.id,
                 'uom_po_id': task.product_purchase_uom.id,
                 'categ_id': task.product_cat.id,
@@ -342,7 +375,7 @@ class SaleBOM(models.Model):
 
     task_id = fields.Many2one('project.task', string="Task", ondelete='cascade')
     product_id = fields.Many2one('product.product', string='Product', required=False)
-    vendor_price = fields.Float(string="Supplier Cost" , store=True)
+    vendor_price = fields.Float(string="Supplier Cost", store=True)
     cost = fields.Float(
         string="Cost",
         related='product_id.standard_price',
