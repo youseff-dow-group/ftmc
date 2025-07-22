@@ -69,6 +69,7 @@ class SaleOrder(models.Model):
                     'quantity': task.quantity or 0.0,
                     'unit_price': task.selling_price or 0.0,
                     'total_price': task.selling_price_with_quantity or 0.0,
+                    'total_price_with_discount': task.final_price_after_discount or 0.0,
                     'total': sum(task.quantity for task in line.task_ids) or 0.0,
                 })
 
@@ -80,29 +81,43 @@ class SaleOrder(models.Model):
 
         return categories
 
-
-
     def get_category_summary(self):
         """
-        Calculate total quantity and amount for each product category
-        Returns a list of dictionaries with category name, total quantity, and total amount
+        Calculate total quantity and amount for each product category and unit of measure
+        Returns a list of dictionaries with category name, total quantity, amount, and uom
         """
         summary = []
         categories = self.get_product_orderlines()
-        print("iteeeeeesm ", categories.items())
+
         for category_name, entries in categories.items():
+            # Dictionary to aggregate per UoM
+            uom_summary = {}
+
             for entry in entries:
-                lines = entry['lines']
+                for line in entry['lines']:
+                    uom_name = line.product_uom.name
 
-                total_qty = sum(line.product_uom_qty for line in lines)
-                total_amount = sum(line.price_subtotal for line in lines)
+                    key = (category_name, uom_name)
+                    if key not in uom_summary:
+                        uom_summary[key] = {
+                            'qty': 0.0,
+                            'amount': 0.0,
+                            'discount': 0.0,
+                        }
 
+                    uom_summary[key]['qty'] += line.product_uom_qty
+                    uom_summary[key]['amount'] += line.price_subtotal
+                    uom_summary[key]['discount'] += line.discount_value
+
+            # Convert aggregated dict to list format
+            for (cat_name, uom_name), values in uom_summary.items():
                 summary.append({
-                    'name': category_name,
-                    'qty': total_qty,
-                    'amount': total_amount
+                    'name': cat_name,
+                    'uom': uom_name,
+                    'qty': values['qty'],
+                    'amount': values['amount'],
+                    'discount': values['discount']
                 })
-                print("line", lines)
 
         return summary
 
@@ -253,13 +268,16 @@ class SaleOrder(models.Model):
         result = []
         # Sort sale_bom_ids by 'sequence'
         sorted_bom_lines = task.sale_bom_ids.sorted('sequence').filtered(lambda l: l.is_selected == False)
+        print('sorted bom lines --------------',sorted_bom_lines)
 
         for bom_line in sorted_bom_lines:
+            print("booom", bom_line.is_selected)
             result.append({
                 'product': bom_line.name,
                 'quantity': bom_line.quantity,
                 'display_type': bom_line.display_type,
             })
+        print("resasasasasas------", result)
 
         return result
 

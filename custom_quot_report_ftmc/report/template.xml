@@ -214,71 +214,82 @@
                     </div>
 
                     <!-- CATEGORY SUMMARY TABLE -->
-                    <table class="item-table">
+                    <table class="item-table"
+                           style="width: 100%; border-collapse: collapse; border: 1px solid black; font-size: 14px;">
                         <thead>
-                            <tr>
-                                <th>S.NO.</th>
-                                <th>Item's</th>
-                                <th>QTY</th>
-                                <th>Amount</th>
+                            <tr style="background-color: #f2f2f2; border: 1px solid black;">
+                                <th style="border: 1px solid black; text-align: center;">S.No.</th>
+                                <th style="border: 1px solid black; text-align: center;">Item Description</th>
+                                <th style="border: 1px solid black; text-align: center;">Qty</th>
+                                <th style="border: 1px solid black; text-align: center;">TOTAL PRICE</th>
                             </tr>
                         </thead>
                         <tbody>
                             <t t-set="counter" t-value="1"/>
                             <t t-set="total_amount" t-value="0"/>
+                            <t t-set="total_discount" t-value="0"/>
+
                             <t t-foreach="doc.get_category_summary()" t-as="category">
                                 <tr>
-                                    <td class="number">
+                                    <td style="border: 1px solid black; text-align: center;">
                                         <t t-esc="counter"/>
                                     </td>
-                                    <td>
+                                    <td style="border: 1px solid black;">
                                         <t t-esc="category['name']"/>
-                                        ---SET
                                     </td>
-                                    <td class="number">
+                                    <td style="border: 1px solid black; text-align: center;">
                                         <t t-esc="category['qty']"/>
                                     </td>
-                                    <td class="number">
+                                    <td style="border: 1px solid black; text-align: right;">
                                         <t t-esc="category['amount']"
                                            t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                     </td>
                                 </tr>
                                 <t t-set="counter" t-value="counter + 1"/>
                                 <t t-set="total_amount" t-value="total_amount + category['amount']"/>
+                                <t t-set="total_discount" t-value="total_discount + category.get('discount', 0)"/>
                             </t>
 
-                            <!-- TOTALS SECTION -->
+                            <!-- Empty row for spacing -->
+
+
+                            <!-- Totals -->
                             <tr>
-                                <td colspan="2">
-                                    Amount in words:
-                                    <t t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+                                <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold;">
+                                    Gross Total:
                                 </td>
-                                <td>
-                                    <strong>Gross Total:</strong>
-                                </td>
-                                <td class="number">
+                                <td style="border: 1px solid black; text-align: right; font-weight: bold;">
                                     <t t-esc="total_amount"
                                        t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                 </td>
                             </tr>
-                            <t t-if="doc.amount_untaxed != doc.amount_total">
-                                <tr>
-                                    <td colspan="3">
-                                        <strong>Discount</strong>
-                                    </td>
-                                    <td class="number">
-                                        <t t-esc="total_amount - doc.amount_total"
-                                           t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
-                                    </td>
-                                </tr>
-                            </t>
                             <tr>
-                                <td colspan="3">
-                                    <strong>Total Amount:</strong>
+                                <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold;">
+                                    Other Discounts:
                                 </td>
-                                <td class="number">
+                                <td style="border: 1px solid black; text-align: right;">
+                                    <t t-esc="total_discount"
+                                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold;">
+                                    Total Amount:
+                                </td>
+                                <td style="border: 1px solid black; text-align: right; font-weight: bold;">
                                     <t t-esc="doc.amount_total"
                                        t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="border: 1px solid black; font-weight: bold;">
+                                    Amount in words:
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="border: 1px solid black; font-weight: bold;">
+                                    <t t-esc="doc.currency_id.amount_to_text(doc.amount_total)"/>
+                                    only
                                 </td>
                             </tr>
                         </tbody>
@@ -322,7 +333,7 @@
                     <t t-foreach="categories.items()" t-as="category">
                         <table class="item-table section-margin">
                             <tr class="panel-header">
-                                <td colspan="5">
+                                <td colspan="6">
                                     <t t-esc="category[0]"/>
                                 </td>
                             </tr>
@@ -331,11 +342,11 @@
                                 <th>Item Description</th>
                                 <th>Qty</th>
                                 <th>U/P</th>
+                                <th>T/D</th>
                                 <th>T/P</th>
                             </tr>
                             <t t-set="counter" t-value="1"/>
                             <t t-set="category_total" t-value="0"/>
-                            ---------------
                             <t t-set="entries" t-value="category[1]"/>
                             <t t-foreach="entries" t-as="entry">
                                 <t t-foreach="entry['tasks']" t-as="task">
@@ -349,8 +360,13 @@
                                         <td class="number">
                                             <t t-esc="task['quantity']"/>
                                         </td>
+
                                         <td class="number">
                                             <t t-esc="task['unit_price']"
+                                               t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                        </td>
+                                        <td class="number">
+                                            <t t-esc="task['total_price_with_discount']"
                                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                         </td>
                                         <td class="number">
@@ -371,10 +387,13 @@
                                     <t t-esc="task['total']"/>
                                 </td>
                                 <td></td>
+
+                                <td></td>
                                 <td class="number">
                                     <t t-esc="category_total"
                                        t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                 </td>
+
                             </tr>
                         </table>
                     </t>
@@ -397,6 +416,14 @@
                     <style>
                         /* Capacitor Bank Table Styling - Exact match to the image */
                         /* MDB Product Row Highlight */
+                        body {
+                        font-family: Arial, sans-serif;
+                        font-size: 14px; /* or 16px for even larger text */
+                        }
+
+                        td, th, div, span, p, label {
+                        font-size: 14px !important; /* override all inherited font sizes */
+                        }
                         .mdb-product-row {
                         background-color: #e6f2ff !important; /* Light blue background */
                         }
@@ -632,11 +659,12 @@
                     <div>Reference to your inquiry as stated above, please find our offer as follows:</div>
 
                     <!-- CATEGORY SUMMARY TABLE -->
-                    <table class="item-table">
+                    <table class="capacitor-table">
                         <thead>
                             <tr>
                                 <th>S.NO.</th>
                                 <th>Item's</th>
+                                <th>UOM</th>
                                 <th>QTY</th>
                             </tr>
                         </thead>
@@ -650,7 +678,9 @@
                                     </td>
                                     <td>
                                         <t t-esc="category['name']"/>
-                                        ---SET
+                                    </td>
+                                    <td>
+                                        <t t-esc="category['uom']"/>
                                     </td>
                                     <td class="number">
                                         <t t-esc="category['qty']"/>
