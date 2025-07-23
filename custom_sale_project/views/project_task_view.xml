@@ -79,6 +79,7 @@
 
                         </notebook>
                         <group>
+
                             <field name="over_head_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="total_bom_cost" readonly="1" widget="monetary"
@@ -123,6 +124,8 @@
         <field name="inherit_id" ref="project.view_task_tree2"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='user_ids']" position="after">
+                                                                        <field name="quantity" optional="hidden"/>
+
                 <field name="over_head_cost" readonly="1" widget="monetary" optional="hidden"
                        options="{'currency_field': 'company_currency_id'}"/>
                 <field name="total_bom_cost" readonly="1" widget="monetary" optional="hidden"

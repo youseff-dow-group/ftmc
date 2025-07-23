@@ -16,10 +16,10 @@ class SaleOrderLine(models.Model):
         for line in self:
             line.task_count = len(line.task_ids)
 
-    @api.depends('product_uom_qty', 'discount', 'price_unit', 'tax_id', 'discount_value')
+    @api.depends('product_uom_qty', 'price_unit', 'discount_value','discount')
     def _compute_discount_amount(self):
         for line in self:
-            line.discount = (line.discount_value / line.price_unit) * 100 if line.discount_value else 0
+            line.discount_value = (line.discount / 100) * (line.price_unit * line.product_uom_qty)  if line.discount else 0
 
     def _prepare_invoice_line(self, **optional_values):
         res = super()._prepare_invoice_line(**optional_values)

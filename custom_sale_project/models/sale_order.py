@@ -118,7 +118,7 @@ class SaleOrder(models.Model):
                     total_selling_price = sum(task.final_price_after_discount for task in related_tasks if task.final_price_after_discount > 0)
 
                     if total_selling_price > 0:
-                        average_price = total_selling_price / task_count
+                        average_price = total_selling_price / total_quantity
                         line.price_unit = average_price
                     else:
                         # If no selling price in tasks, keep original price

@@ -274,6 +274,15 @@
                             </tr>
                             <tr>
                                 <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold;">
+                                    Tax :
+                                </td>
+                                <td class="number">
+                                     <t t-esc="total_amount - doc.amount_total"
+                                       t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="3" style="border: 1px solid black; text-align: right; font-weight: bold;">
                                     Total Amount:
                                 </td>
                                 <td style="border: 1px solid black; text-align: right; font-weight: bold;">
@@ -366,11 +375,11 @@
                                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                         </td>
                                         <td class="number">
-                                            <t t-esc="task['total_price_with_discount']"
+                                            <t t-esc="task['total_discount']"
                                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                         </td>
                                         <td class="number">
-                                            <t t-esc="task['total_price']"
+                                            <t t-esc="task['total_price_with_discount']"
                                                t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                         </td>
                                     </tr>
