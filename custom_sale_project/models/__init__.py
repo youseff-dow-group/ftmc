@@ -6,3 +6,4 @@ from . import account_move_line
 from . import purchase_order_line
 from . import mrp_bom
 from . import paroduct
+from . import product_brand

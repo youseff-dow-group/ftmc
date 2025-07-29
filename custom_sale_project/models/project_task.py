@@ -80,7 +80,7 @@ class ProjectTask(models.Model):
         store=True,
         help="Display name combining product name and reference sales order"
     )
-    hour_cost = fields.Float(string="Hour Cost")
+    hour_cost = fields.Float(string="Hour Cost",compute='_compute_hour_cost', store=True)
 
     over_head_cost = fields.Float(string="Over Head Cost Cost", compute="_compute_over_head_cost", store=True)
     margin_amount = fields.Float(string="Margin Amount", compute="_compute_margin_amount", store=True)
@@ -122,6 +122,19 @@ class ProjectTask(models.Model):
         store=True,
         help="Final price after applying discount to selling price with quantity"
     )
+
+    @api.depends('product_cat','product_cat.hour_cost')
+    def _compute_hour_cost(self):
+        for task in self:
+            task.hour_cost = task.product_cat.hour_cost if task.product_cat else 0.0
+
+    @api.onchange('product_cat')
+    def _onchange_category_id_set_hour_cost(self):
+        for task in self:
+            if task.product_cat:
+                task.hour_cost = task.product_cat.hour_cost
+            else:
+                task.hour_cost = 0.0
 
     @api.depends('selling_price_with_quantity', 'discount')
     def _compute_discount_amount_on_quantity(self):

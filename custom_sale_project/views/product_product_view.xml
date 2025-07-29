@@ -6,7 +6,6 @@
         <field name="arch" type="xml">
             <field name="name" position="after">
                 <field name="description_sale" optional="show"/>
-
             </field>
         </field>
     </record>
@@ -30,7 +29,7 @@
         <field name="inherit_id" ref="product.product_template_search_view"/>
         <field name="arch" type="xml">
             <field name="categ_id" position="after">
-                <field string="Sales description" name="description_sale"
+                <field string="Technical description" name="description_sale"
                        filter_domain="[('description_sale', 'ilike', self)]"/>
             </field>
 
@@ -42,9 +41,32 @@
         <field name="model">product.template</field>
         <field name="inherit_id" ref="product.product_template_form_view"/>
         <field name="arch" type="xml">
+
+            <!--            <xpath expr="//field[@name='categ_id']" position="after">-->
+            <!--                <field name="default_code" string="Ref No" invisible="product_variant_count &gt; 1"/>-->
+            <!--            </xpath>-->
+            <!--            <xpath expr="//field[@name='default_code']" position="replace">-->
+            <!--            </xpath>-->
             <field name="taxes_id" position="after">
-                <field name="installation_hours" string="installation_hours"/>
+                <field name="installation_hours"/>
+                <field name="brand_id"/>
             </field>
+
+            <group name="description" position="attributes">
+                <attribute name="string">Technical description</attribute>
+            </group>
+
+        </field>
+    </record>
+
+    <record id="view_product_category_form_inherit_hour_cost" model="ir.ui.view">
+        <field name="name">product.category.form.inherit.hour.cost</field>
+        <field name="model">product.category</field>
+        <field name="inherit_id" ref="product.product_category_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='avatax_category_id']" position="after">
+                <field name="hour_cost"/>
+            </xpath>
         </field>
     </record>
 

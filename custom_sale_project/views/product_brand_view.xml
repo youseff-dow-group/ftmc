@@ -1,0 +1,42 @@
+<odoo>
+
+    <record id="view_product_brand_tree" model="ir.ui.view">
+        <field name="name">product.brand.tree</field>
+        <field name="model">product.brand</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="name"/>
+            </tree>
+        </field>
+    </record>
+
+    <record id="view_product_brand_form" model="ir.ui.view">
+        <field name="name">product.brand.form</field>
+        <field name="model">product.brand</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <!-- Action to open list/form of brands -->
+    <record id="action_product_brand" model="ir.actions.act_window">
+        <field name="name">Product Brands</field>
+        <field name="res_model">product.brand</field>
+        <field name="view_mode">tree,form</field>
+        <field name="help" type="html">
+            <p>Manage the brands associated with your products.</p>
+        </field>
+    </record>
+
+    <!-- Menu item under Sales > Configuration -->
+    <menuitem id="menu_product_brand"
+              name="Product Brands"
+              parent="sale.menu_sale_config"
+              action="action_product_brand"
+              sequence="25"/>
+</odoo>

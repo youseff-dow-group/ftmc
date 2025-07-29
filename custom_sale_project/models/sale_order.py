@@ -48,11 +48,9 @@ class SaleOrder(models.Model):
                 # Create tasks based on quantity
                 quantity = int(line.product_uom_qty) if line.product_uom_qty > 0 else 1
 
-                for i in range(quantity):
+                for i in range(quantity, 0, -1):
                     # Create task name with sequence number if quantity > 1
-                    task_name = line.product_id.name
-                    if quantity > 1:
-                        task_name = f"{line.product_id.name} - {i + 1}"
+                    task_name = f"{line.product_id.name} - {i}" if quantity > 1 else line.product_id.name
 
                     project_task = self.env['project.task'].create({
                         'name': task_name,

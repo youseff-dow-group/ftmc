@@ -14,7 +14,7 @@
                     <group string="BOM INFORMATION" invisible=" not is_new_bom">
                         <group>
                             <field name="product_name"/>
-                            <field name="description_name"/>
+                            <field name="description_name" string="Technical Description name"/>
                             <field name="display_name"/>
                             <field name="reference_sales_order"/>
                             <field name="sale_order_id" invisible="0" readonly="0"/>
@@ -23,7 +23,7 @@
                             <field name="product_purchase_uom" readonly="0"/>
                             <field name="product_cat" readonly="0"/>
                             <field name="quantity"/>
-                            <field name="hour_cost"/>
+                            <field name="hour_cost" readonly="0"/>
                             <field name="margin"/>
                             <field name="discount"/>
                             <field name="total_price" invisible="1"/>
