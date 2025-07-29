@@ -1,4 +1,6 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_category_make_relation_user,category.make.relation.user,model_category_make_relation,,1,1,1,1
-access_componentmake,component.make,model_component_make,base.group_user,1,1,1,1
+access_brand_make_relation_user,brand.make.relation,model_brand_make_relation,,1,1,1,1
+access_componentmake,component.make,model_component_make,,1,1,1,1
+access_technical_description,technical.description,model_technical_description,,1,1,1,1
 

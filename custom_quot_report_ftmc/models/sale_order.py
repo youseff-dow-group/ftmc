@@ -25,6 +25,7 @@ class SaleOrder(models.Model):
     )
 
     category_make_ids = fields.One2many('category.make.relation', 'sale_id', string='Category Makes')
+    brand_make_ids = fields.One2many('brand.make.relation', 'sale_id', string='Brand Makes')
 
     def get_product_tasks(self):
         """
@@ -149,6 +150,21 @@ class SaleOrder(models.Model):
                 })
             if make_details:  # Only add if there are makes
                 result[relation.category_id.name] = make_details
+        return result
+    def get_brand_makes_with_descriptions(self):
+        """
+        Get the Brand makes with descriptions for each product brand in the sale order
+        Returns a dictionary with brand names as keys and lists of make details as values
+        """
+        result = {}
+        for relation in self.brand_make_ids:
+            brand_details = []
+            for brand in relation.technical_ids:
+                brand_details.append({
+                    'name': brand.name,
+                })
+            if brand_details:  # Only add if there are brands
+                result[relation.brand_id.name] = brand_details
         return result
 
     def update_category_make_relations(self):
@@ -314,3 +330,13 @@ class CategoryMakeRelation(models.Model):
 
 
     category_name = fields.Char(related='category_id.name', string='Category Name', readonly=True)
+
+class BrandMakeRelation(models.Model):
+    _name = 'brand.make.relation'
+    _description = 'Product Category and Component Make Relation'
+
+    sale_id = fields.Many2one('sale.order', string='Sale Order', ondelete='cascade')
+    brand_id = fields.Many2one('product.brand', string='Product Brand', required=True)
+    technical_ids = fields.Many2many('technical.description', string='Brand Makes', required=True)
+
+

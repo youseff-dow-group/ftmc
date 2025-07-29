@@ -334,6 +334,28 @@
                         </t>
                     </t>
 
+
+                    <!-- Brand MAKES DETAILS -->
+                    <div class="section-margin">
+                        <strong>Technical Descriptions Details:</strong>
+                    </div>
+                    <t t-set="technical_description" t-value="doc.get_brand_makes_with_descriptions()"/>
+                    <t t-foreach="technical_description.items()" t-as="category">
+                        <t t-set="note_counter" t-value="1"/>
+                        <div class="make-category">
+                            <t t-esc="category[0]"/>:
+                        </div>
+                        <t t-foreach="category[1]" t-as="make">
+                            <div class="make-description">
+                                <span class="note-number"><t t-esc="note_counter"/>-
+                                </span>
+                                <t t-esc="make['name']"/>
+                            </div>
+                            <t t-set="note_counter" t-value="note_counter + 1"/>
+
+                        </t>
+                    </t>
+
                     <!-- PAGE BREAK -->
                     <div class="page-break"></div>
 
