@@ -64,7 +64,7 @@
         <field name="model">product.category</field>
         <field name="inherit_id" ref="product.product_category_form_view"/>
         <field name="arch" type="xml">
-            <xpath expr="//field[@name='avatax_category_id']" position="after">
+            <xpath expr="//field[@name='parent_id']" position="after">
                 <field name="hour_cost"/>
             </xpath>
         </field>
