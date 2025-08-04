@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sale Line Margin Wizard Form View -->
+    <record id="view_sale_line_margin_wizard_form" model="ir.ui.view">
+        <field name="name">sale.line.margin.wizard.form</field>
+        <field name="model">sale.line.margin.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Apply Margin to Tasks">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Apply Margin to Related Tasks</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sale_line_id" readonly="1"/>
+                            <field name="related_tasks_count" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="margin_amount" />
+                        </group>
+                    </group>
+                    <group string="Current Tasks Information">
+                        <field name="current_tasks_info" readonly="1" nolabel="1" widget="text"/>
+                    </group>
+                </sheet>
+                <footer>
+                    <button name="action_apply_margin" string="Apply Margin" type="object" class="btn-primary"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Sale Line Margin Wizard -->
+    <record id="action_sale_line_margin_wizard" model="ir.actions.act_window">
+        <field name="name">Apply Margin to Tasks</field>
+        <field name="res_model">sale.line.margin.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_sale_line_id': active_id}</field>
+    </record>
+</odoo>

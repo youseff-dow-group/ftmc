@@ -1,0 +1,158 @@
+<odoo>
+    <record id="view_task_form_inherit_bom" model="ir.ui.view">
+        <field name="name">project.task.form.inherit.bom</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_product" type="object" string="View Product"
+                        class="oe_stat_button"
+                        invisible="not product_id"/>
+            </xpath>
+            <xpath expr="//sheet/group" position="after">
+                <form>
+                    <group string="BOM INFORMATION" invisible=" not is_new_bom">
+                        <group>
+                            <field name="product_name"/>
+                            <field name="description_name" string="Technical Description name"/>
+                            <field name="display_name"/>
+                            <field name="reference_sales_order"/>
+                            <field name="sale_order_id" invisible="0" readonly="0"/>
+                            <field name="sale_order_line_id" invisible="0" domain="[('order_id', '=', sale_order_id)]"/>
+                            <field name="product_uom" readonly="0"/>
+                            <field name="product_purchase_uom" readonly="0"/>
+                            <field name="product_cat" readonly="0"/>
+                            <field name="quantity"/>
+                            <field name="hour_cost" readonly="0"/>
+                            <field name="margin"/>
+                            <field name="discount"/>
+                            <field name="total_price" invisible="1"/>
+                            <!-- New Similar BOM field -->
+                            <field name="similar_bom_id"
+                                   placeholder="Select a task to copy its BOM..."
+                                   options="{'no_create': True, 'no_create_edit': True}"/>
+                        </group>
+                        <notebook>
+                            <page string="Bom" name="bom">
+                                <button name="%(multiple_product_action_new)d"
+                                        class="oe_highlight" string="Product List" type="action"
+                                />
+                                <field name="sale_bom_ids" widget="section_and_note_one2many"
+                                       mode="tree">
+                                    <tree editable="bottom">
+
+                                        <control>
+                                            <create name="add_product_control"
+                                                    string="Add a product"/>
+                                            <create name="add_note_control" string="Add a note"
+                                                    context="{'default_display_type': 'line_note'}"/>
+
+                                        </control>
+                                        <field name="sequence" widget="handle"/>
+                                        <field name="is_selected" widget="boolean_toggle"/>
+
+
+                                        <field name="product_id" create="false"
+                                               required="not display_type=='line_note'"
+                                               delete="false"/>
+                                        <field name="name" widget="section_and_note_text" optional="show"/>
+
+                                        <field name="product_uom" readonly="0"/>
+                                        <field name="product_category" readonly="0"/>
+                                        <field name="product_uom_category_id" column_invisible="1"/>
+                                        <field name="vendor_partner"/>
+                                        <field name="cost" optional="hide"
+                                               groups="custom_sale_project.group_see_bom_cost"/>
+                                        <field name="vendor_price"/>
+                                        <field name="installation_hours" optional="show"/>
+
+                                        <field name="discount" optional="show"/>
+                                        <field name="discounted_price" optional="hide" column_invisible="1"/>
+                                        <field name="available_vendors" column_invisible="1"/>
+                                        <field name="available_qty" readonly="1" optional="show"/>
+                                        <field name="quantity" default="1.00"/>
+                                        <field name="line_total"/>
+                                        <field name="display_type" column_invisible="1"/>
+
+
+                                    </tree>
+                                </field>
+                            </page>
+
+                        </notebook>
+                        <group>
+
+                            <field name="over_head_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="total_bom_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="component_cost" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="before_margin" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="before_margin_with_qty" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="margin_amount" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="margin_amount_with_qty" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="selling_price" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="selling_price_with_quantity" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="discount_amount_on_quantity" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                            <field name="final_price_after_discount" readonly="1" widget="monetary"
+                                   options="{'currency_field': 'company_currency_id'}"/>
+                        </group>
+
+                    </group>
+
+                </form>
+
+            </xpath>
+
+            <field name="tag_ids" position="after">
+                <field name="is_new_bom"/>
+                <field name="product_id" invisible="1"/>
+
+            </field>
+            <xpath expr="//field[@name='personal_stage_type_id']" position="after">
+                <button string="Create New BoM" name="action_create_product_bom" type="object"
+                        invisible=" not is_new_bom"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record model="ir.ui.view" id="view_task_tree2_inherited">
+        <field name="name">project.task.form.inherited</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_tree2"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='user_ids']" position="after">
+                                                                        <field name="quantity" optional="hidden"/>
+
+                <field name="over_head_cost" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="total_bom_cost" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="component_cost" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="before_margin" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="margin_amount" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="selling_price" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="selling_price_with_quantity" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="discount_amount_on_quantity" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+                <field name="final_price_after_discount" readonly="1" widget="monetary" optional="hidden"
+                       options="{'currency_field': 'company_currency_id'}"/>
+
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
