@@ -505,7 +505,7 @@ class SaleOrder(models.Model):
 
                         # Add the cost (vendor_price * quantity from BOM)
                         cost = bom_line.vendor_price * bom_line.quantity if hasattr(bom_line,
-                                                                                    'vendor_price') and bom_line.vendor_price else bom_line.total_cost
+                                                                                    'vendor_price') and bom_line.vendor_price else bom_line.cost
                         data_matrix[category.id][line.id] += cost
                     else:
                         # Handle products without category
@@ -515,7 +515,7 @@ class SaleOrder(models.Model):
                             data_matrix[0][line.id] = 0
 
                         cost = bom_line.vendor_price * bom_line.quantity if hasattr(bom_line,
-                                                                                    'vendor_price') and bom_line.vendor_price else bom_line.total_cost
+                                                                                    'vendor_price') and bom_line.vendor_price else bom_line.cost
                         data_matrix[0][line.id] += cost
                         product_categories.add(None)  # Add None for uncategorized
 
