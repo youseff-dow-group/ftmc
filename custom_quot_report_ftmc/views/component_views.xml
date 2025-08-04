@@ -2,14 +2,15 @@
 <odoo>
     <data>
         <!-- Component Make Form View -->
-        <record id="view_technical_description_form" model="ir.ui.view">
-            <field name="name">technical.description.form</field>
-            <field name="model">technical.description</field>
+        <record id="view_component_make_form" model="ir.ui.view">
+            <field name="name">component.make.form</field>
+            <field name="model">component.make</field>
             <field name="arch" type="xml">
                 <form>
                     <sheet>
                         <group>
                             <field name="name"/>
+                            <field name="description"/>
                         </group>
                     </sheet>
                 </form>
@@ -17,28 +18,29 @@
         </record>
 
         <!-- Component Make Tree View -->
-        <record id="view_technical_description_tree" model="ir.ui.view">
-            <field name="name">technical.description.tree</field>
-            <field name="model">technical.description</field>
+        <record id="view_component_make_tree" model="ir.ui.view">
+            <field name="name">component.make.tree</field>
+            <field name="model">component.make</field>
             <field name="arch" type="xml">
                 <tree>
                     <field name="name"/>
+                    <field name="description"/>
 
                 </tree>
             </field>
         </record>
 
         <!-- Component Make Action -->
-        <record id="action_technical_description" model="ir.actions.act_window">
-            <field name="name">Technical Description</field>
-            <field name="res_model">technical.description</field>
+        <record id="action_component_make" model="ir.actions.act_window">
+            <field name="name">Component Makes</field>
+            <field name="res_model">component.make</field>
             <field name="view_mode">tree,form</field>
         </record>
 
         <!-- Menu Item -->
-        <menuitem id="menu_technical_description"
-                  name="Technical Makes"
-                  action="action_technical_description"
+        <menuitem id="menu_component_make"
+                  name="Component Makes"
+                  action="action_component_make"
                   parent="sale.menu_sale_config"
                   sequence="20"/>
     </data>
