@@ -300,7 +300,7 @@ class SaleOrder(models.Model):
         current_row = 6
         for row_idx, category in enumerate(product_categories):
             # Write category name
-            worksheet.write(current_row + row_idx, 0, category.name if category else 'Uncategorized', label_format)
+            worksheet.write(current_row + row_idx, 0, category.complete_name if category else 'Uncategorized', label_format)
 
             # Write data for each sale order line
             row_total = 0
@@ -527,7 +527,7 @@ class SaleOrder(models.Model):
             margin_amounts[line.id] = total_margin_amount
 
         # Convert set to sorted list
-        product_categories = sorted(list(product_categories), key=lambda x: x.name if x else 'ZZZ_Uncategorized')
+        product_categories = sorted(list(product_categories), key=lambda x: x.complete_name if x else 'ZZZ_Uncategorized')
 
         return {
             'sale_lines': sale_lines,
