@@ -578,7 +578,7 @@ class SaleBOM(models.Model):
             if record.discount:
                 record.discounted_price = record.vendor_price * ( record.discount / 100)
             else:
-                record.discounted_price =  self.vendor_partner.price
+                record.discounted_price =  self.vendor_partner.price[0]
 
     # @api.depends('vendor_partner')
     # def _compute_vendor_price(self):
