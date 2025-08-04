@@ -275,14 +275,14 @@ class SaleOrder(models.Model):
         # Write header information
         header_end_col = chr(ord('A') + total_columns - 1)
         worksheet.merge_range(f"A1:{chr(ord('A') + (total_columns // 2))}1", f"Brand: {brand}", header_format)
-        worksheet.merge_range(f'{chr(ord('A') + (total_columns // 2) + 1)}1:{header_end_col}1',
-                              f'COPPER: AED {copper_price:.2f} /KG', header_format)
+        worksheet.merge_range(f"{chr(ord('A') + (total_columns // 2) + 1)}1:{header_end_col}1",
+                              f"COPPER: AED {copper_price:.2f} /KG", header_format)
 
         # Write title
-        worksheet.merge_range(f'A3:{header_end_col}3', 'COSTING SHEET', title_format)
+        worksheet.merge_range(f"A3:{header_end_col}3", 'COSTING SHEET', title_format)
 
         # Write project info
-        worksheet.merge_range(f'A5:{chr(ord('A') + 2)}5', f'Project: {self.name}', label_format)
+        worksheet.merge_range(f"A5:{chr(ord('A') + 2)}5", f"Project: {self.name}", label_format)
 
         # Write column headers
         worksheet.write('A6', 'PANEL TYPE', panel_header_format)
