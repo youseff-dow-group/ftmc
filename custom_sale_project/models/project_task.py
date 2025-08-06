@@ -579,7 +579,7 @@ class SaleBOM(models.Model):
     def _compute_discounted_price(self):
         for record in self:
             if record.discount:
-                record.discounted_price = record.vendor_price * ( record.discount / 100)
+                record.discounted_price = record.vendor_price * (1 - (record.discount / 100))
             else:
                 record.discounted_price =  0.0
 
