@@ -500,10 +500,13 @@ class SaleBOM(models.Model):
                 _("You cannot change the type of a warranty order line. Instead you should delete the current line and create a new line of the proper type."))
         return super().write(values)
 
-    @api.depends('vendor_price', 'quantity')
+    @api.depends('vendor_price', 'quantity','discounted_price')
     def _compute_line_total(self):
         for record in self:
-            record.line_total = record.vendor_price * record.quantity
+            if record.discounted_price:
+                record.line_total = record.discounted_price * record.quantity
+            else:
+                record.line_total = record.vendor_price * record.quantity
 
     @api.onchange('product_id', 'task_id')
     def _onchange_product_id(self):
@@ -533,14 +536,14 @@ class SaleBOM(models.Model):
                 # record.vendor_price = record.product_id.standard_price
                 record.name = record.product_id.description_sale
 
-    @api.onchange('discounted_price')
-    def _onchange_discount(self):
-        """Update the vendor price based on the discount percentage."""
-        if self.vendor_price and self.discounted_price:
-            self.vendor_price = self.discounted_price
-        elif not self.discounted_price:
-            if self.vendor_partner:
-                self.vendor_price = self.vendor_partner.price
+    # @api.onchange('discounted_price')
+    # def _onchange_discount(self):
+    #     """Update the vendor price based on the discount percentage."""
+    #     if self.vendor_price and self.discounted_price:
+    #         self.vendor_price = self.discounted_price
+    #     elif not self.discounted_price:
+    #         if self.vendor_partner:
+    #             self.vendor_price = self.vendor_partner.price
 
     @api.onchange('vendor_partner')
     def _onchange_vendor_partner(self):

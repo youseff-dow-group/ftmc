@@ -13,6 +13,13 @@ class SaleOrderDiscountWizard(models.TransientModel):
     affected_bom_lines_count = fields.Integer(string='Affected BOM Lines', compute='_compute_affected_bom_lines')
     current_bom_info = fields.Text(string='BOM Lines to be Updated', compute='_compute_current_bom_info')
 
+    # Field to store available category IDs for domain
+    available_category_ids = fields.Many2many(
+        'product.category',
+        compute='_compute_available_categories',
+        help="Categories available in BOM lines for this sale order"
+    )
+
     @api.depends('sale_order_id', 'product_category_id')
     def _compute_affected_bom_lines(self):
         for wizard in self:
@@ -30,6 +37,7 @@ class SaleOrderDiscountWizard(models.TransientModel):
                 bom_lines = self._get_affected_bom_lines()
                 info_lines = []
                 for bom_line in bom_lines:
+                    print("bom lineeeee- ", bom_line)
                     task_name = bom_line.task_id.name if bom_line.task_id else 'Unknown Task'
                     product_name = bom_line.product_id.name if bom_line.product_id else 'Unknown Product'
                     current_discount = getattr(bom_line, 'discount', 0)
@@ -94,3 +102,48 @@ class SaleOrderDiscountWizard(models.TransientModel):
     def action_cancel(self):
         """Cancel the wizard"""
         return {'type': 'ir.actions.act_window_close'}
+
+
+    @api.onchange('sale_order_id')
+    def _onchange_sale_order_id(self):
+        """Reset product category when sale order changes"""
+        if self.sale_order_id:
+            self.product_category_id = False
+            # Force recomputation of available categories
+            self._compute_available_categories()
+
+            # Return domain for product_category_id
+            return {
+                'domain': {
+                    'product_category_id': [('id', 'in', self.available_category_ids.ids)]
+                }
+            }
+        else:
+            return {
+                'domain': {
+                    'product_category_id': [('id', '=', False)]
+                }
+            }
+
+    @api.depends('sale_order_id')
+    def _compute_available_categories(self):
+        """Compute available product categories from BOM lines in this sale order"""
+        for wizard in self:
+            if wizard.sale_order_id:
+                # Find all tasks related to this sale order
+                tasks = self.env['project.task'].search([
+                    ('sale_order_id', '=', wizard.sale_order_id.id)
+                ])
+
+                # Find all BOM lines in these tasks
+                bom_lines = self.env['sale.bom'].search([
+                    ('task_id', 'in', tasks.ids),
+                    ('product_id', '!=', False),
+                    ('product_id.categ_id', '!=', False)
+                ])
+
+                # Get unique categories
+                category_ids = bom_lines.mapped('product_id.categ_id').ids
+                wizard.available_category_ids = [(6, 0, category_ids)]
+            else:
+                wizard.available_category_ids = [(6, 0, [])]
