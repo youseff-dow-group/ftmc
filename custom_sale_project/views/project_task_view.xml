@@ -67,7 +67,7 @@
                                         <field name="installation_hours" optional="show"/>
 
                                         <field name="discount" optional="show"/>
-                                        <field name="discounted_price" optional="hide" column_invisible="1"/>
+                                        <field name="discounted_price" optional="show" column_invisible="0"/>
                                         <field name="available_vendors" column_invisible="1"/>
                                         <field name="available_qty" readonly="1" optional="show"/>
                                         <field name="quantity" default="1.00"/>
