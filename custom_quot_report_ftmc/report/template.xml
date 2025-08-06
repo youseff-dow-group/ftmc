@@ -801,7 +801,7 @@
                                         <t t-foreach="get_bom_tasks" t-as="bom">
                                             <tr>
                                                 <td class="no-col"></td>
-                                                <td t-attf-class="#{'h6 ' if bom['display_type'] == 'line_note' else ''}desc-col component-indent">
+                                                <td t-attf-style="#{'font-weight: bolder; background-color: #f0f0f0;' if bom['display_type'] == 'line_note' else ''}">
                                                     <t
 
                                                             t-esc="bom['product']"/>
