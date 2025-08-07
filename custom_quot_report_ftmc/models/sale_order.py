@@ -159,14 +159,11 @@ class SaleOrder(models.Model):
         result = {}
         for relation in self.brand_make_ids:
             brand_details = []
-            print("brand detasasas",brand_details ,relation.technical_ids)
             for brand in relation.technical_ids:
-                print("brand --------", brand, brand.name)
 
                 brand_details.append({
                     'name': brand.name,
                 })
-            print("brand ^^^^^^^^^^^^^^^^",brand_details)
 
             if brand_details:  # Only add if there are brands
                 result[relation.brand_id.name] = brand_details
@@ -226,7 +223,6 @@ class SaleOrder(models.Model):
                 'tasks': task_summaries,
             })
 
-        print("mddddddddddddddddddb", mdb_products)
         return mdb_products
     def get_product_bom(self, product_id):
         """

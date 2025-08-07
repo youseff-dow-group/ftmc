@@ -277,7 +277,7 @@
                                     Tax :
                                 </td>
                                 <td class="number">
-                                     <t t-esc="total_amount - doc.amount_total"
+                                    <t t-esc="total_amount - doc.amount_total"
                                        t-options='{"widget": "monetary", "display_currency": doc.currency_id}'/>
                                 </td>
                             </tr>
@@ -460,6 +460,8 @@
                         }
                         .bom-product-row {
                         background-color: #d4edda !important; /* Light green background */
+                        font-weight: bold !important;
+                        font-size: 18px !important;
                         }
                         .mdb-product-row td {
                         font-weight: bold;
@@ -784,11 +786,14 @@
                                 <t t-foreach="mdb['tasks']" t-as="task">
                                     <t t-set="get_bom_tasks" t-value="doc.get_task_bom_details(task['id'])"/>
 
-                                    <tr class="bom-product-row">
+                                    <tr style="background-color: #d4edda;font-size-adjust: 0.7;font-family:system-ui ">
                                         <td class="no-col"></td>
-                                        <td class="h6 desc-col component-section">
-                                            <t t-esc="task['name']"/>
-
+                                        <td class="h12 desc-col component-section" style="font-size-adjust: 0.7;font-family:system-ui">
+                                            <strong>
+                                                <span style="color: #000000;font-size-adjust: 0.7;font-family:system-ui">
+                                                    <t t-esc="task['name']"/>
+                                                </span>
+                                            </strong>
                                         </td>
 
 
