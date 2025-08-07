@@ -8,8 +8,8 @@ class SaleOrderLine(models.Model):
 
     discount_amount = fields.Float(string="Discount Amount", compute="_compute_discount_amount", store=True)
 
-    task_ids = fields.One2many('project.task', 'sale_order_line_id', string="Related Tasks")
-    task_count = fields.Integer(string="Task Count", compute="_compute_task_count")
+    task_ids = fields.One2many('project.task', 'sale_order_line_id', string="Related Boms")
+    task_count = fields.Integer(string="Bom Count", compute="_compute_task_count")
 
     @api.depends('task_ids')
     def _compute_task_count(self):

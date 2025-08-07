@@ -6,18 +6,19 @@
         <field name="arch" type="xml">
 
             <xpath expr="//field[@name='order_line']//tree/field[@name='product_template_id']" position="after">
-                <field name="task_count" string="Tasks"/>
+                <field name="task_count" string="Boms"/>
 
                 <button name="action_view_tasks" type="object"
                         class="btn-link"
+                        string="Boms"
                         attrs="{'invisible': [('task_count', '=', 0)]}"
                         icon="fa-tasks">
-                    <field name="task_count" column_invisible="1"/>
+                    <field name="task_count" string="Boms" column_invisible="1"/>
                 </button>
                 <button name="%(action_sale_line_margin_wizard)d"
                         type="action"
                         icon="fa-percent"
-                        title="Apply Margin to Tasks"
+                        title="Apply Margin to Boms"
                         context="{'default_sale_line_id': id}"
                         invisible="task_count == 0"/>
             </xpath>
@@ -29,11 +30,13 @@
                     <field name="project_id" widget="statinfo"/>
                 </button>
 
+
                 <button name="action_view_tasks"
                         type="object"
-                        class="oe_stat_button"
+                        class="btn-link"
+                        string="Boms"
                         icon="fa-tasks">
-                    <field name="task_count" widget="statinfo"/>
+                    <field name="task_count" string="Boms" widget="statinfo"/>
                 </button>
 
                 <button name="action_print_costing_report"
@@ -49,7 +52,7 @@
                         string="Create Assembly" class="btn-primary"/>
 
                 <button name="action_update_lines_from_tasks" type="object"
-                        string="Update Lines from Tasks"
+                        string="Update Lines from Boms"
                         class="btn-secondary"
                         invisible="project_id == 'False'"
                         help="Update sale order lines quantity and price based on related tasks"/>

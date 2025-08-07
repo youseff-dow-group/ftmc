@@ -13,7 +13,7 @@ class SaleOrder(models.Model):
 
 
     project_id = fields.Many2one('project.project', string="Related Project")
-    task_count = fields.Integer(string="Tasks Count", compute="_compute_task_count")
+    task_count = fields.Integer(string="Boms Count", compute="_compute_task_count")
 
     total_discount = fields.Float(string='Total Discount', compute='_compute_total_discount', store=True)
     # Add field to store temporary report file
@@ -87,7 +87,7 @@ class SaleOrder(models.Model):
     def action_view_tasks(self):
         self.ensure_one()
         return {
-            'name': 'Tasks',
+            'name': 'Boms',
             'type': 'ir.actions.act_window',
             'res_model': 'project.task',
             'view_mode': 'tree,form',
@@ -268,15 +268,10 @@ class SaleOrder(models.Model):
         for i in range(1, total_columns):
             worksheet.set_column(i, i, 15)  # Data columns
 
-        # Default values (can be made configurable)
-        copper_price = 55.00
-        brand = 'WH'
 
         # Write header information
         header_end_col = chr(ord('A') + total_columns - 1)
-        worksheet.merge_range(f"A1:{chr(ord('A') + (total_columns // 2))}1", f"Brand: {brand}", header_format)
-        worksheet.merge_range(f"{chr(ord('A') + (total_columns // 2) + 1)}1:{header_end_col}1",
-                              f"COPPER: AED {copper_price:.2f} /KG", header_format)
+
 
         # Write title
         worksheet.merge_range(f"A3:{header_end_col}3", 'COSTING SHEET', title_format)
@@ -482,8 +477,8 @@ class SaleOrder(models.Model):
 
                 # Add margin data
                 if hasattr(task, 'margin') and task.margin:
-                    total_margin_percent += task.margin
-                    task_count += 1
+                    total_margin_percent = task.margin
+                    task_count = 1
 
                 if hasattr(task, 'margin_amount') and task.margin_amount_with_qty:
                     total_margin_amount += task.margin_amount_with_qty
