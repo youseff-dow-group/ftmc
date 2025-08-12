@@ -4,3 +4,4 @@ access_product_brand,access_product_brand,model_product_brand,,1,1,1,1
 access_multiple_product,access.multiple.product,model_multiple_product,base.group_user,1,1,1,1
 access_sale_line_margin_wizard,access_sale_line_margin_wizard,model_sale_line_margin_wizard,,1,1,1,1
 access_sale_order_discount_wizard,access_sale_order_discount_wizard,model_sale_order_discount_wizard,,1,1,1,1
+access_sale_line_discount_wizard,access_sale_line_discount_wizard,model_sale_line_discount_wizard,,1,1,1,1

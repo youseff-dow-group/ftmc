@@ -143,21 +143,21 @@ class ProjectTask(models.Model):
             else:
                 task.hour_cost = 0.0
 
-    @api.depends('selling_price_with_quantity', 'discount')
+    @api.depends('before_margin_with_qty', 'discount')
     def _compute_discount_amount_on_quantity(self):
         """Calculate the discount amount based on selling_price_with_quantity and discount percentage."""
         for record in self:
-            selling_price_qty = record.selling_price_with_quantity or 0.0
+            before_margin_qty = record.before_margin_with_qty or 0.0
             discount_percent = record.discount or 0.0
-            record.discount_amount_on_quantity = selling_price_qty * (discount_percent / 100)
+            record.discount_amount_on_quantity = before_margin_qty * (discount_percent / 100)
 
     @api.depends('selling_price_with_quantity', 'discount_amount_on_quantity')
     def _compute_final_price_after_discount(self):
         """Calculate the final price after applying discount."""
         for record in self:
-            selling_price_qty = record.selling_price_with_quantity or 0.0
+            before_margin_qty = record.before_margin_with_qty or 0.0
             discount_amount = record.discount_amount_on_quantity or 0.0
-            record.final_price_after_discount = selling_price_qty - discount_amount
+            record.final_price_after_discount = before_margin_qty - discount_amount
 
 
 
@@ -217,8 +217,9 @@ class ProjectTask(models.Model):
     @api.depends('sale_bom_ids.installation_hours', 'hour_cost','product_id.installation_hours')
     def _compute_over_head_cost(self):
         for task in self:
-            total_installation_hours = sum(line.installation_hours for line in task.sale_bom_ids)
-            task.over_head_cost = total_installation_hours * task.hour_cost
+            total_installation_hours = sum(line.installation_hours for line in task.sale_bom_ids if line.installation_hours )
+            total_quantity = sum(line.quantity for line in task.sale_bom_ids if line.installation_hours )
+            task.over_head_cost = (total_installation_hours * total_quantity ) * task.hour_cost * task.quantity
 
     # Set the rec_name to use our custom display_name
     # _rec_names_search = ['display_name']

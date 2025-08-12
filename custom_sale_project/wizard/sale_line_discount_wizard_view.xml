@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Sale Line Discount Wizard Form View -->
+    <record id="view_sale_line_discount_wizard_form" model="ir.ui.view">
+        <field name="name">sale.line.discount.wizard.form</field>
+        <field name="model">sale.line.discount.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Apply Discount to Boms">
+                <sheet>
+                    <div class="oe_title">
+                        <h1>Apply Discount to Related Tasks</h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="sale_line_id" readonly="1"/>
+                            <field name="related_tasks_count" readonly="1"/>
+                        </group>
+                        <group>
+                            <field name="discount_amount" widget="percentage"/>
+                        </group>
+                    </group>
+                    <group string="Current Tasks Information">
+                        <field name="current_tasks_info" readonly="1" nolabel="1" widget="text"/>
+                    </group>
+                    <div class="alert alert-info" role="alert">
+                        <strong>Note:</strong> This will update the discount percentage for all tasks related to this sale order line.
+                    </div>
+                    <div class="alert alert-warning" role="alert" invisible="discount_amount == 0">
+                        <strong>Warning:</strong> Discount of <field name="discount_amount" readonly="1"/>% will be applied to <field name="related_tasks_count" readonly="1"/> task(s).
+                    </div>
+                </sheet>
+                <footer>
+                    <button name="action_apply_discount" string="Apply Discount" type="object" class="btn-primary"/>
+                    <button name="action_cancel" string="Cancel" type="object" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- Action for Sale Line Discount Wizard -->
+    <record id="action_sale_line_discount_wizard" model="ir.actions.act_window">
+        <field name="name">Apply Discount to Boms</field>
+        <field name="res_model">sale.line.discount.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="context">{'default_sale_line_id': active_id}</field>
+    </record>
+</odoo>
