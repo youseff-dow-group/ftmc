@@ -406,7 +406,7 @@
                                         </td>
                                     </tr>
                                     <t t-set="counter" t-value="counter + 1"/>
-                                    <t t-set="category_total" t-value="category_total + task['total_price']"/>
+                                    <t t-set="category_total" t-value="task['total_price']"/>
                                 </t>
                             </t>
 
@@ -752,7 +752,7 @@
                     <div class="section-margin">
                         <strong>MAIN DISTRIBUTION BOARDS (MDBs):</strong>
                     </div>
-                    <table class="table table-borderless">
+                    <table class="table table-borderless" style="font-size:18px">
                         <thead>
                             <tr>
                                 <th class="no-col">No</th>

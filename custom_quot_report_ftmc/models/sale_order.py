@@ -68,8 +68,8 @@ class SaleOrder(models.Model):
                 task_summaries.append({
                     'name': task.description_name or '',
                     'quantity': task.quantity or 0.0,
-                    'unit_price': task.selling_price or 0.0,
-                    'total_price': task.selling_price_with_quantity or 0.0,
+                    'unit_price': task.margin_amount_with_qty / task.quantity or 0.0,
+                    'total_price': sum(task.final_price_after_discount for task in line.task_ids) or 0.0,
                     'total_discount': task.discount_amount_on_quantity or 0.0,
                     'total_price_with_discount': task.final_price_after_discount or 0.0,
                     'total': sum(task.quantity for task in line.task_ids) or 0.0,
