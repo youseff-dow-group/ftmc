@@ -155,9 +155,9 @@ class ProjectTask(models.Model):
     def _compute_final_price_after_discount(self):
         """Calculate the final price after applying discount."""
         for record in self:
-            before_margin_qty = record.before_margin_with_qty or 0.0
+            selling_price_with_quantity = record.selling_price_with_quantity or 0.0
             discount_amount = record.discount_amount_on_quantity or 0.0
-            record.final_price_after_discount = before_margin_qty - discount_amount
+            record.final_price_after_discount = selling_price_with_quantity - discount_amount
 
 
 
