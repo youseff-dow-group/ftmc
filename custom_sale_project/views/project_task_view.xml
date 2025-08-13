@@ -97,9 +97,9 @@
                             <field name="margin_amount_with_qty" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="selling_price" readonly="1" widget="monetary"
-                                   options="{'currency_field': 'company_currency_id'}"/>
+                                   options="{'currency_field': 'company_currency_id'}" invisible="1"/>
                             <field name="selling_price_with_quantity" readonly="1" widget="monetary"
-                                   options="{'currency_field': 'company_currency_id'}"/>
+                                   options="{'currency_field': 'company_currency_id'}" invisible="1"/>
                             <field name="discount_amount_on_quantity" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="final_price_after_discount" readonly="1" widget="monetary"
@@ -141,10 +141,6 @@
                 <field name="before_margin" readonly="1" widget="monetary" optional="hidden"
                        options="{'currency_field': 'company_currency_id'}"/>
                 <field name="margin_amount" readonly="1" widget="monetary" optional="hidden"
-                       options="{'currency_field': 'company_currency_id'}"/>
-                <field name="selling_price" readonly="1" widget="monetary" optional="hidden"
-                       options="{'currency_field': 'company_currency_id'}"/>
-                <field name="selling_price_with_quantity" readonly="1" widget="monetary" optional="hidden"
                        options="{'currency_field': 'company_currency_id'}"/>
                 <field name="discount_amount_on_quantity" readonly="1" widget="monetary" optional="hidden"
                        options="{'currency_field': 'company_currency_id'}"/>

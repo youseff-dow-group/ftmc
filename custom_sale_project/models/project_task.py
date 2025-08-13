@@ -82,9 +82,9 @@ class ProjectTask(models.Model):
     )
     hour_cost = fields.Float(string="Hour Cost",compute='_compute_hour_cost', store=True)
 
-    over_head_cost = fields.Float(string="Over Head Cost Cost", compute="_compute_over_head_cost", store=True)
+    over_head_cost = fields.Float(string="Over Head Cost", compute="_compute_over_head_cost", store=True)
     margin_amount = fields.Float(string="Margin Amount", compute="_compute_margin_amount", store=True)
-    margin_amount_with_qty = fields.Float(string="Margin Amount With Quantity", compute="_compute_margin_amount_with_qty", store=True)
+    margin_amount_with_qty = fields.Float(string="Total Cost + Margin", compute="_compute_margin_amount_with_qty", store=True)
 
     component_cost = fields.Float(
         string="Component Cost",
@@ -92,13 +92,13 @@ class ProjectTask(models.Model):
         store=True
     )
     before_margin = fields.Float(
-        string="Total component cost",
+        string="Total Component Cost",
         compute="_compute_before_margin",
         store=True
     )
 
     before_margin_with_qty = fields.Float(
-        string="Before Margin with quantity",
+        string="Total Cost",
         compute="_compute_before_margin_with_qty",
         store=True
     )
@@ -145,19 +145,19 @@ class ProjectTask(models.Model):
 
     @api.depends('before_margin_with_qty', 'discount')
     def _compute_discount_amount_on_quantity(self):
-        """Calculate the discount amount based on selling_price_with_quantity and discount percentage."""
+        """Calculate the discount amount based on before_margin_qty and discount percentage."""
         for record in self:
             before_margin_qty = record.before_margin_with_qty or 0.0
             discount_percent = record.discount or 0.0
             record.discount_amount_on_quantity = before_margin_qty * (discount_percent / 100)
 
-    @api.depends('selling_price_with_quantity', 'discount_amount_on_quantity')
+    @api.depends( 'discount_amount_on_quantity','margin_amount_with_qty')
     def _compute_final_price_after_discount(self):
         """Calculate the final price after applying discount."""
         for record in self:
-            selling_price_with_quantity = record.selling_price_with_quantity or 0.0
+            margin_amount_with_qty = record.margin_amount_with_qty or 0.0
             discount_amount = record.discount_amount_on_quantity or 0.0
-            record.final_price_after_discount = selling_price_with_quantity - discount_amount
+            record.final_price_after_discount = margin_amount_with_qty - discount_amount
 
 
 
@@ -204,15 +204,15 @@ class ProjectTask(models.Model):
             result.append((name))
         return result
 
-    @api.depends('before_margin', 'margin')
+    @api.depends('before_margin_with_qty', 'margin')
     def _compute_margin_amount(self):
         for task in self:
-            task.margin_amount = (task.before_margin or 0.0) * (task.margin or 0.0) / 100.0
+            task.margin_amount = (task.before_margin_with_qty or 0.0) * (task.margin or 0.0) / 100.0
 
     @api.depends('before_margin', 'margin','quantity')
     def _compute_margin_amount_with_qty(self):
         for task in self:
-            task.margin_amount_with_qty = ((task.before_margin or 0.0) * (task.margin or 0.0) / 100.0) * task.quantity
+            task.margin_amount_with_qty = (task.before_margin_with_qty or 0.0) + (task.margin_amount or 0.0)
 
     @api.depends('sale_bom_ids.installation_hours', 'hour_cost','product_id.installation_hours','quantity')
     def _compute_over_head_cost(self):
