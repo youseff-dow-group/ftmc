@@ -92,7 +92,7 @@ class ProjectTask(models.Model):
         store=True
     )
     before_margin = fields.Float(
-        string="Before Margin",
+        string="Total component cost",
         compute="_compute_before_margin",
         store=True
     )
@@ -175,15 +175,15 @@ class ProjectTask(models.Model):
             margin_percent = task.margin or 0.0
             task.selling_price = (before_margin + (before_margin * margin_percent / 100))
 
-    @api.depends('component_cost', 'over_head_cost')
+    @api.depends('component_cost','quantity')
     def _compute_before_margin(self):
         for task in self:
-            task.before_margin = (task.component_cost or 0.0) + (task.over_head_cost or 0.0)
+            task.before_margin = (task.component_cost or 0.0) * (task.quantity or 0.0)
 
-    @api.depends('component_cost', 'over_head_cost','quantity')
+    @api.depends('over_head_cost','quantity','before_margin')
     def _compute_before_margin_with_qty(self):
         for task in self:
-            task.before_margin_with_qty = ((task.component_cost or 0.0) + (task.over_head_cost or 0.0)) * task.quantity
+            task.before_margin_with_qty = (task.before_margin or 0.0) + (task.over_head_cost or 0.0)
 
     @api.depends('sale_bom_ids.line_total')
     def _compute_component_cost(self):
@@ -214,12 +214,13 @@ class ProjectTask(models.Model):
         for task in self:
             task.margin_amount_with_qty = ((task.before_margin or 0.0) * (task.margin or 0.0) / 100.0) * task.quantity
 
-    @api.depends('sale_bom_ids.installation_hours', 'hour_cost','product_id.installation_hours')
+    @api.depends('sale_bom_ids.installation_hours', 'hour_cost','product_id.installation_hours','quantity')
     def _compute_over_head_cost(self):
         for task in self:
-            total_installation_hours = sum(line.installation_hours for line in task.sale_bom_ids if line.installation_hours )
-            total_quantity = sum(line.quantity for line in task.sale_bom_ids if line.installation_hours )
-            task.over_head_cost = (total_installation_hours * total_quantity ) * task.hour_cost * task.quantity
+            total_installation_hours_with_qty = 0
+            for line in task.sale_bom_ids:
+                total_installation_hours_with_qty += line.installation_hours * line.quantity
+            task.over_head_cost = total_installation_hours_with_qty  * task.hour_cost * task.quantity
 
     # Set the rec_name to use our custom display_name
     # _rec_names_search = ['display_name']

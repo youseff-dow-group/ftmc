@@ -1,4 +1,4 @@
-from odoo import models, fields, api ,_
+from odoo import models, fields, api, _
 
 from odoo.exceptions import ValidationError
 import xlsxwriter
@@ -7,10 +7,8 @@ from io import BytesIO
 from datetime import datetime
 
 
-
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
-
 
     project_id = fields.Many2one('project.project', string="Related Project")
     task_count = fields.Integer(string="Boms Count", compute="_compute_task_count")
@@ -19,7 +17,7 @@ class SaleOrder(models.Model):
     # Add field to store temporary report file
     costing_report_file = fields.Binary(string='Costing Report File', attachment=False)
 
-    @api.depends('order_line.discount_value','order_line.discount')
+    @api.depends('order_line.discount_value', 'order_line.discount')
     def _compute_total_discount(self):
         """Compute the value of the field total_discount."""
         for record in self:
@@ -72,7 +70,6 @@ class SaleOrder(models.Model):
                     project_task.sale_order_id = sale.id
                     project_task.sale_order_line_id = line.id
 
-
     def action_view_project(self):
         self.ensure_one()
         return {
@@ -120,7 +117,8 @@ class SaleOrder(models.Model):
                     # print("totaaaaaala ", total_quantity)
 
                     # Calculate average selling price from tasks
-                    total_selling_price = sum(task.final_price_after_discount for task in related_tasks if task.final_price_after_discount > 0)
+                    total_selling_price = sum(task.final_price_after_discount for task in related_tasks if
+                                              task.final_price_after_discount > 0)
 
                     if total_selling_price > 0:
                         average_price = total_selling_price / total_quantity
@@ -133,8 +131,6 @@ class SaleOrder(models.Model):
                 'type': 'ir.actions.client',
                 'tag': 'reload',
             }
-
-
 
         # -----------------------------------------
 
@@ -356,12 +352,19 @@ class SaleOrder(models.Model):
         totals_row = labor_row + 1
         worksheet.write(totals_row, 0, 'TOTAL COST', total_format)
 
-        # Calculate column totals using final_price_after_discount from tasks
         grand_total = 0
         for col_idx, line in enumerate(sale_lines, 1):
-            # Get total from final_price_after_discount field
-            tasks = self.env['project.task'].search([('sale_order_line_id', '=', line.id)])
-            col_total = sum(task.final_price_after_discount for task in tasks)
+            # Calculate total categorized costs for this column
+            categorized_total = 0
+            for category in product_categories:
+                category_id = category.id if category else 0
+                categorized_total += data_matrix.get(category_id, {}).get(line.id, 0)
+
+            # Add labor cost for this column
+            labor_cost = labor_costs.get(line.id, 0)
+
+            # Total cost = categorized costs + labor
+            col_total = categorized_total + labor_cost
 
             if col_total > 0:
                 worksheet.write(totals_row, col_idx, col_total, total_format)
@@ -390,7 +393,7 @@ class SaleOrder(models.Model):
         # Write average discount percentage
         if discount_count > 0:
             avg_discount = total_discount_percent / 100
-            worksheet.write(discount_row, len(sale_lines) + 1, avg_discount , discount_percent_format)
+            worksheet.write(discount_row, len(sale_lines) + 1, avg_discount, discount_percent_format)
         else:
             worksheet.write(discount_row, len(sale_lines) + 1, '-', discount_percent_format)
 
@@ -428,7 +431,7 @@ class SaleOrder(models.Model):
         # Write average margin percentage - FIXED CALCULATION
         if margin_count > 0:
             avg_margin = total_margin_percent / 100
-            worksheet.write(margin_row, len(sale_lines) + 1, avg_margin , margin_percent_format)
+            worksheet.write(margin_row, len(sale_lines) + 1, avg_margin, margin_percent_format)
         else:
             worksheet.write(margin_row, len(sale_lines) + 1, '-', margin_percent_format)
 
@@ -452,24 +455,34 @@ class SaleOrder(models.Model):
         net_row = margin_value_row + 1
         worksheet.write(net_row, 0, 'NET AMOUNT', total_format)
 
-
-
+        total_net = 0
         for col_idx, line in enumerate(sale_lines, 1):
-            # Get total cost for this column
-            tasks = self.env['project.task'].search([('sale_order_line_id', '=', line.id)])
-            col_total = sum(task.final_price_after_discount for task in tasks)
+            # Get total cost for this column (same calculation as TOTAL COST row)
+            categorized_total = 0
+            for category in product_categories:
+                category_id = category.id if category else 0
+                categorized_total += data_matrix.get(category_id, {}).get(line.id, 0)
+
+            # Add labor cost for this column
+            labor_cost = labor_costs.get(line.id, 0)
+
+            # Total cost = categorized costs + labor
+            col_total_cost = categorized_total + labor_cost
+
+            # Get margin and discount amounts
             discount_amount = discount_amounts.get(line.id, 0)
             margin_amount = margin_amounts.get(line.id, 0)
-            price_total = line.price_total
-            net_value = price_total
+
+            # Calculate NET AMOUNT: Total Cost + Margin in Value - Discount in Value
+            net_value = col_total_cost + margin_amount - discount_amount
 
             if net_value > 0:
                 worksheet.write(net_row, col_idx, net_value, total_format)
+                total_net += net_value
             else:
                 worksheet.write(net_row, col_idx, '-', total_format)
 
         # Write total net amount
-        total_net = grand_total  + total_margin_amount
         worksheet.write(net_row, len(sale_lines) + 1, total_net, total_format)
 
         # Write project summary
@@ -483,7 +496,7 @@ class SaleOrder(models.Model):
         })
 
         worksheet.write(summary_row, 0, 'PROJECT COST', summary_format)
-        worksheet.write(summary_row, 1, grand_total , summary_value_format)
+        worksheet.write(summary_row, 1, grand_total, summary_value_format)
         worksheet.write(summary_row + 1, 0, 'PROJECT LABOR', summary_format)
         worksheet.write(summary_row + 1, 1, total_labor, summary_value_format)
         worksheet.write(summary_row + 2, 0, 'PROJECT DISCOUNT', summary_format)
@@ -551,8 +564,8 @@ class SaleOrder(models.Model):
                     task_count = 1
 
                 # FIXED: Use correct field name
-                if hasattr(task, 'margin_amount') and task.margin_amount:
-                    total_margin_amount += task.margin_amount
+                if hasattr(task, 'margin_amount') and task.margin_amount_with_qty:
+                    total_margin_amount += task.margin_amount_with_qty
 
                 # Add discount data
                 if hasattr(task, 'discount') and task.discount:
@@ -577,8 +590,8 @@ class SaleOrder(models.Model):
                             data_matrix[category.id][line.id] = 0
 
                         # FIXED: Use correct field name
-                        cost = bom_line.vendor_price * bom_line.quantity if hasattr(bom_line,
-                                                                                    'vendor_price') and bom_line.vendor_price else bom_line.cost
+                        cost = bom_line.line_total if hasattr(bom_line,
+                                                              'line_total') and bom_line.line_total else bom_line.cost
                         data_matrix[category.id][line.id] += cost
                     else:
                         # Handle products without category
@@ -588,8 +601,8 @@ class SaleOrder(models.Model):
                             data_matrix[0][line.id] = 0
 
                         # FIXED: Use correct field name
-                        cost = bom_line.vendor_price * bom_line.quantity if hasattr(bom_line,
-                                                                                    'vendor_price') and bom_line.vendor_price else bom_line.cost
+                        cost = bom_line.line_total if hasattr(bom_line,
+                                                              'line_total') and bom_line.line_total else bom_line.cost
                         data_matrix[0][line.id] += cost
                         product_categories.add(None)  # Add None for uncategorized
 
@@ -605,6 +618,7 @@ class SaleOrder(models.Model):
         # Convert set to sorted list
         product_categories = sorted(list(product_categories),
                                     key=lambda x: x.complete_name if x else 'ZZZ_Uncategorized')
+        print("dataaaaaaaaaamatrixx", data_matrix)
 
         return {
             'sale_lines': sale_lines,

@@ -85,7 +85,7 @@
                             <field name="over_head_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="total_bom_cost" readonly="1" widget="monetary"
-                                   options="{'currency_field': 'company_currency_id'}"/>
+                                   options="{'currency_field': 'company_currency_id'}" column_invisible="1" invisible="1"/>
                             <field name="component_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="before_margin" readonly="1" widget="monetary"
