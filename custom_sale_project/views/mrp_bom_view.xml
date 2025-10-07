@@ -84,6 +84,13 @@
 
             </xpath>
 
+            <xpath expr="//field[@name='code']" position="after">
+
+
+                <field name="sale_order_id"/>
+
+            </xpath>
+
         </field>
     </record>
 </odoo>
