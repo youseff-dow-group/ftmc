@@ -16,6 +16,7 @@
                             <field name="product_name"/>
                             <field name="description_name" string="Technical Description name"/>
                             <field name="display_name"/>
+                            <field name="bom_id"/>
                             <field name="reference_sales_order"/>
                             <field name="sale_order_id" invisible="0" readonly="0"/>
                             <field name="sale_order_line_id" invisible="0" domain="[('order_id', '=', sale_order_id)]"/>
@@ -85,7 +86,8 @@
                             <field name="over_head_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="total_bom_cost" readonly="1" widget="monetary"
-                                   options="{'currency_field': 'company_currency_id'}" column_invisible="1" invisible="1"/>
+                                   options="{'currency_field': 'company_currency_id'}" column_invisible="1"
+                                   invisible="1"/>
                             <field name="component_cost" readonly="1" widget="monetary"
                                    options="{'currency_field': 'company_currency_id'}"/>
                             <field name="before_margin" readonly="1" widget="monetary"
@@ -124,13 +126,24 @@
         </field>
     </record>
 
+    <!-- Server Action -->
+    <record id="action_project_task_create_bom" model="ir.actions.server">
+        <field name="name">Create Product BOM</field>
+        <field name="model_id" ref="project.model_project_task"/>
+        <field name="binding_model_id" ref="project.model_project_task"/>
+        <field name="binding_type">action</field> <!-- makes it appear in the Action dropdown -->
+        <field name="state">code</field>
+        <field name="code">records.action_create_product_bom()</field>
+    </record>
+
     <record model="ir.ui.view" id="view_task_tree2_inherited">
         <field name="name">project.task.form.inherited</field>
         <field name="model">project.task</field>
         <field name="inherit_id" ref="project.view_task_tree2"/>
         <field name="arch" type="xml">
+
             <xpath expr="//field[@name='user_ids']" position="after">
-                                                                        <field name="quantity" optional="hidden"/>
+                <field name="quantity" optional="hidden"/>
 
                 <field name="over_head_cost" readonly="1" widget="monetary" optional="hidden"
                        options="{'currency_field': 'company_currency_id'}"/>

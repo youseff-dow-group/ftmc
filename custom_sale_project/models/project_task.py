@@ -130,6 +130,9 @@ class ProjectTask(models.Model):
         help="Final price after applying discount to selling price with quantity"
     )
 
+    bom_id = fields.Many2one('mrp.bom', string='Bom Reference')
+
+
     @api.depends('product_cat','product_cat.hour_cost')
     def _compute_hour_cost(self):
         for task in self:
@@ -335,10 +338,18 @@ class ProjectTask(models.Model):
                 raise ValidationError(
                     "Conditions not met: Ensure 'Need new BOM' is checked, Sale BOM is filled, and Quantity is positive.")
 
+            # --- Build product name from three fields ---
+            parts = [
+                task.reference_sales_order or '',
+                task.product_name or '',
+                task.description_name or '',
+            ]
+            full_name = " - ".join(filter(None, parts))  # skip empty parts
+
             # Create product template
             product_template = self.env['product.template'].sudo().create({
-                'name': task.product_name,
-                'type': 'consu',
+                'name': full_name,
+                'type': 'product',
                 'list_price': task.final_price_after_discount,
                 'uom_id': task.product_uom.id,
                 'uom_po_id': task.product_purchase_uom.id,
@@ -353,9 +364,12 @@ class ProjectTask(models.Model):
             # Create BOM
             bom = self.env['mrp.bom'].sudo().create({
                 'product_tmpl_id': product_template.id,
+                'sale_order_id': task.sale_order_id.id,
                 'product_qty': task.quantity,
                 'type': 'normal',
             })
+
+            task.bom_id = bom.id
 
             # Create BOM lines
             for line in task.sale_bom_ids:
@@ -368,16 +382,18 @@ class ProjectTask(models.Model):
                     'sequence': line.sequence,
                 })
 
-            # Return success notification
-            return {
-                'type': 'ir.actions.act_window',
-                'name': _('Sale Order'),
-                'res_model': 'sale.order',
-                'res_id': task.sale_order_id.id,
-                'view_mode': 'form',
-                'view_type': 'form',
-                'target': 'current',
-            }
+        # Return success notification
+        last_task = self[-1]
+
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Sale Order'),
+            'res_model': 'sale.order',
+            'res_id': task.sale_order_id.id,
+            'view_mode': 'form',
+            'view_type': 'form',
+            'target': 'current',
+        }
 
     def _update_sale_order_line_product(self, product_template):
         self.ensure_one()

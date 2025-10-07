@@ -132,7 +132,69 @@ class SaleOrder(models.Model):
                 'tag': 'reload',
             }
 
-        # -----------------------------------------
+    def action_create_bom_from_lines(self):
+        """Create one BOM for each sale order line, using components from related tasks' BOMs."""
+        for order in self:
+            if not order.order_line:
+                raise ValidationError(_("This Sale Order has no lines."))
+
+            created_boms = self.env['mrp.bom']
+
+            for line in order.order_line:
+                if not line.product_id:
+                    continue
+
+                # 🔍 Find all related tasks with a valid BOM
+                related_tasks = self.env['project.task'].search([
+                    ('sale_order_line_id', '=', line.id),
+                    ('bom_id', '!=', False)
+                ])
+
+                # 🚫 Skip this line if no task has a BOM
+                if not related_tasks:
+                    continue
+
+                # ✅ Create a new BOM for the product in this sale order line
+                new_bom = self.env['mrp.bom'].sudo().create({
+                    'product_tmpl_id': line.product_id.product_tmpl_id.id,
+                    'product_qty': line.product_uom_qty or 1.0,
+                    'type': 'normal',
+                })
+
+                # ✅ Add components from each task's BOM
+                for task in related_tasks:
+                    self.env['mrp.bom.line'].sudo().create({
+                        'bom_id': new_bom.id,
+                        'product_id': task.product_id.product_variant_id.id,
+                        'product_qty': task.quantity,
+                        'sequence': task.task_sequence,
+                        'name': task.product_name ,
+                    })
+
+                created_boms |= new_bom
+
+            # 🚨 If no BOM was created for any line, raise an error
+            if not created_boms:
+                raise ValidationError(_("No tasks with valid BOMs were found for this Sale Order."))
+
+            # ✅ Open the last created BOM
+            return {
+                'type': 'ir.actions.act_window',
+                'name': _('Created BOM'),
+                'res_model': 'mrp.bom',
+                'view_mode': 'form',
+                'res_id': created_boms[-1].id,
+                'target': 'current',
+            }
+
+    @api.model
+    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
+        args = args or []
+        domain = args + ['|', ('reference_sales_order', operator, name)]
+        print("نننننننننننننن", self._search(domain, limit=limit, access_rights_uid=name_get_uid), domain)
+        return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
+
+        # ----------------------------------------- Report Excel ---------------------------------
 
     def action_generate_costing_report(self):
         """Open wizard to generate costing report"""

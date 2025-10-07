@@ -1,4 +1,5 @@
-from odoo import models, fields,api
+from odoo import models, fields, api
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
@@ -19,17 +20,15 @@ class ProductTemplate(models.Model):
                 return brand_products.name_get()
 
             # Or include brand in main search domain
-            domain = ['|', ('brand_id.name', operator, name),
-                      ('name', operator, name)]
+            domain = ['|', '|', '|', ('brand_id.name', operator, name),
+                      ('name', operator, name), ('description_sale', operator, name), ('default_code', operator, name)]
             products = self.search(domain + args, limit=limit)
             return products.name_get()
 
         return super().name_search(name=name, args=args, operator=operator, limit=limit)
 
 
-
 class Productproduct(models.Model):
-
     _inherit = 'product.product'
 
     installation_hours = fields.Integer(
@@ -50,7 +49,7 @@ class Productproduct(models.Model):
             if rec.product_tmpl_id.brand_id:
                 name += f" [{rec.product_tmpl_id.brand_id.name}]"
             result.append((rec.id, name))
-            rec.display_name=name
+            rec.display_name = name
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
@@ -61,14 +60,12 @@ class Productproduct(models.Model):
             if brand_products:
                 return brand_products.name_get()
 
-            # Or include brand in main search domain
-            domain = ['|', ('brand_id.name', operator, name),
-                      ('name', operator, name)]
+            domain = ['|', '|', '|', ('brand_id.name', operator, name),
+                      ('name', operator, name), ('description_sale', operator, name), ('default_code', operator, name)]
             products = self.search(domain + args, limit=limit)
             return products.name_get()
 
         return super().name_search(name=name, args=args, operator=operator, limit=limit)
-
 
 
 class ProductCategory(models.Model):

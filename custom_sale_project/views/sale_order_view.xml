@@ -6,8 +6,6 @@
         <field name="arch" type="xml">
 
 
-
-
             <xpath expr="//field[@name='order_line']//tree/field[@name='product_template_id']" position="after">
 
 
@@ -26,12 +24,16 @@
                         string="Apply Margin"
                         context="{'default_sale_line_id': id}"
                         invisible="task_count == 0"/>
-                  <button name="%(action_sale_line_discount_wizard)d"
+                <button name="%(action_sale_line_discount_wizard)d"
                         string="Apply Discount"
                         type="action"
                         class="btn-secondary"
                         icon="fa-minus-circle"
                         help="Apply discount percentage to all related tasks"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//tree/field[@name='product_template_id']" position="attributes">
+                <attribute name="context">{'default_detailed_type': 'product'}
+                </attribute>
             </xpath>
             <xpath expr="//div[@name='button_box']" position="inside">
                 <button name="action_view_project"
@@ -61,6 +63,11 @@
             <header>
                 <button name="action_create_sale_project" type="object"
                         string="Create Assembly" class="btn-primary"/>
+                <button name="action_create_bom_from_lines"
+                        string="Create BOM from Tasks"
+                        type="object"
+                        class="btn-primary"
+                        icon="fa-cubes"/>
 
                 <button name="action_update_lines_from_tasks" type="object"
                         string="Update Lines from Boms"
