@@ -87,7 +87,8 @@
             <xpath expr="//field[@name='code']" position="after">
 
 
-                <field name="sale_order_id"/>
+                <field name="sale_order_id" invisible="1"/>
+                <field name="sale_order_from_task_id" invisible="1"/>
 
             </xpath>
 

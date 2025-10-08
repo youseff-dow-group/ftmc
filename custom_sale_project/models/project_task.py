@@ -361,10 +361,19 @@ class ProjectTask(models.Model):
 
             task.product_id = product_template.id
 
+            #  Prevent duplicate BOM creation for the same sale order line
+            existing_bom = self.env['mrp.bom'].search([
+                ('sale_order_from_task_id', '=', task.sale_order_id.id)
+            ], limit=1)
+            if existing_bom:
+                raise ValidationError(
+                    _("A BOM already exists for this Product (%s).") % task.product_id.display_name
+                )
+
             # Create BOM
             bom = self.env['mrp.bom'].sudo().create({
                 'product_tmpl_id': product_template.id,
-                'sale_order_id': task.sale_order_id.id,
+                'sale_order_from_task_id': task.sale_order_id.id,
                 'product_qty': task.quantity,
                 'type': 'normal',
             })

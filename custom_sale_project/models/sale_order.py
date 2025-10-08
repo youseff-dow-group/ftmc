@@ -144,6 +144,15 @@ class SaleOrder(models.Model):
                 if not line.product_id:
                     continue
 
+                #  Prevent duplicate BOM creation for the same sale order line
+                existing_bom = self.env['mrp.bom'].search([
+                    ('sale_order_id', '=', order.id)
+                ], limit=1)
+                if existing_bom:
+                    raise ValidationError(
+                        _("A BOM already exists for this Sale Order Line (%s).") % line.product_id.display_name
+                    )
+
                 # 🔍 Find all related tasks with a valid BOM
                 related_tasks = self.env['project.task'].search([
                     ('sale_order_line_id', '=', line.id),
@@ -158,7 +167,8 @@ class SaleOrder(models.Model):
                 new_bom = self.env['mrp.bom'].sudo().create({
                     'product_tmpl_id': line.product_id.product_tmpl_id.id,
                     'product_qty': line.product_uom_qty or 1.0,
-                    'type': 'normal',
+                    'type': 'phantom',
+                    'sale_order_id': order.id
                 })
 
                 # ✅ Add components from each task's BOM
