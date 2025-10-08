@@ -51,6 +51,13 @@
                 <field name="installation_hours"/>
                 <field name="brand_id"/>
             </field>
+            <xpath expr="//field[@name='name']" position="after">
+                <label for="product_name_arabic" string="Product Name Arabic"/>
+                <field name="product_name_arabic"/>
+            </xpath>
+            <field name="description_sale" position="after">
+                <field name="sales_details_arabic" placeholder="الوصف بالعربية"/>
+            </field>
 
             <group name="description" position="attributes">
                 <attribute name="string">Technical description</attribute>
@@ -67,6 +74,7 @@
             <xpath expr="//field[@name='parent_id']" position="after">
                 <field name="hour_cost"/>
             </xpath>
+
         </field>
     </record>
 

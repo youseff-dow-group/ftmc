@@ -2,7 +2,7 @@
     'name': 'Sale Order Project',
     'version': '1.0',
     'author': 'Ghaith',
-    'depends': ['sale', 'project', 'account','product'],
+    'depends': ['sale', 'project', 'account','product','mrp'],
     'data': [
         'security/ir.model.access.csv',
         'security/groups.xml',
@@ -16,6 +16,7 @@
         'views/account_move_view.xml',
         'views/mrp_bom_view.xml',
         'views/product_brand_view.xml',
+        'views/stock_picking_view.xml',
     ],
     'installable': True,
     'application': False,

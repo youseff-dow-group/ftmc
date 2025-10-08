@@ -9,6 +9,9 @@ class ProductTemplate(models.Model):
     default_code = fields.Char(
         string='Ref No'
     )
+    product_name_arabic = fields.Char(string='Product Name Arabic')
+    sales_details_arabic = fields.Char(string='Sales Description Arabic')
+
 
     @api.model
     def name_search(self, name='', args=None, operator='ilike', limit=100):
@@ -41,6 +44,9 @@ class Productproduct(models.Model):
     default_code = fields.Char(
         string='Ref No'
     )
+    product_name_arabic = fields.Char(string='Product Name Arabic')
+    sales_details_arabic = fields.Char(string='Sales Description Arabic')
+
 
     def _compute_display_name(self):
         result = []
