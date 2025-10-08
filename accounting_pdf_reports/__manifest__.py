@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 {
-    'name': 'Odoo 17 Accounting Financial Reports (Edited) ',
+    'name': 'Odoo 17 Accounting Financial Reports (Edited)',
     'version': '17.0.1.3',
     'category': 'Invoicing Management',
     'description': 'Accounting Reports For Odoo 17, Accounting Financial Reports, '
