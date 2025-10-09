@@ -146,7 +146,7 @@ class SaleOrder(models.Model):
 
                 #  Prevent duplicate BOM creation for the same sale order line
                 existing_bom = self.env['mrp.bom'].search([
-                    ('sale_order_id', '=', order.id)
+                    ('sale_order_line_id', '=', line.id)
                 ], limit=1)
                 if existing_bom:
                     raise ValidationError(
@@ -168,7 +168,7 @@ class SaleOrder(models.Model):
                     'product_tmpl_id': line.product_id.product_tmpl_id.id,
                     'product_qty': line.product_uom_qty or 1.0,
                     'type': 'phantom',
-                    'sale_order_id': order.id
+                    'sale_order_line_id': line.id
                 })
 
                 # ✅ Add components from each task's BOM
@@ -197,12 +197,11 @@ class SaleOrder(models.Model):
                 'target': 'current',
             }
 
-    @api.model
-    def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
-        args = args or []
-        domain = args + ['|', ('reference_sales_order', operator, name)]
-        print("نننننننننننننن", self._search(domain, limit=limit, access_rights_uid=name_get_uid), domain)
-        return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
+    # @api.model
+    # def _name_search(self, name='', args=None, operator='ilike', limit=100, name_get_uid=None, order=None):
+    #     args = args or []
+    #     domain = args + ['|', ('reference_sales_order', operator, name)]
+    #     return self._search(domain, limit=limit, access_rights_uid=name_get_uid)
 
         # ----------------------------------------- Report Excel ---------------------------------
 

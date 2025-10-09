@@ -22,6 +22,8 @@ class MrpBom(models.Model):
         readonly=False)
 
     sale_order_id = fields.Many2one('sale.order', string='Sale Order')
+    sale_order_line_id = fields.Many2one('sale.order.line', string='Sale Order Line')
+    task_id = fields.Many2one('project.task', string='Task')
     sale_order_from_task_id = fields.Many2one('sale.order', string='Sale Order from task')
 
     # Smart button for viewing the product

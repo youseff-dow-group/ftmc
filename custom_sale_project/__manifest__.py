@@ -2,7 +2,7 @@
     'name': 'Sale Order Project',
     'version': '1.0',
     'author': 'Ghaith',
-    'depends': ['sale', 'project', 'account','product','mrp'],
+    'depends': ['sale', 'project', 'account', 'product', 'mrp'],
     'data': [
         'security/ir.model.access.csv',
         'security/groups.xml',

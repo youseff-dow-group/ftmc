@@ -363,7 +363,7 @@ class ProjectTask(models.Model):
 
             #  Prevent duplicate BOM creation for the same sale order line
             existing_bom = self.env['mrp.bom'].search([
-                ('sale_order_from_task_id', '=', task.sale_order_id.id)
+                ('task_id', '=', task.id)
             ], limit=1)
             if existing_bom:
                 raise ValidationError(
@@ -373,7 +373,7 @@ class ProjectTask(models.Model):
             # Create BOM
             bom = self.env['mrp.bom'].sudo().create({
                 'product_tmpl_id': product_template.id,
-                'sale_order_from_task_id': task.sale_order_id.id,
+                'task_id': task.id,
                 'product_qty': task.quantity,
                 'type': 'normal',
             })
