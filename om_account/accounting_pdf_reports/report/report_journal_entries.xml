@@ -6,16 +6,112 @@
             <t t-call="web.external_layout">
                 <t t-foreach="docs" t-as="o">
                     <div class="page">
-                        <br/>
-                        <div class="oe_structure"/>
+                        <style>
+                            /* ===== General Font Settings ===== */
+                            body, table, td, th, p, span {
+                            font-family: "Arial", sans-serif;
+                            font-size: 15px !important; /* Bigger font for all text */
+                            color: #333;
+                            }
+
+                            /* ===== Header Title ===== */
+                            .journal-entry-title {
+                            text-align: center;
+                            color: #E74C1A;
+                            font-weight: 700;
+                            font-size: 28px; /* Larger title */
+                            margin-bottom: 20px;
+                            }
+
+                            /* ===== Top Info Table ===== */
+                            .journal-header-table {
+                            width: 100%;
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            border: 1px solid #e1e1e1;
+                            border-radius: 10px;
+                            background-color: #fff;
+                            overflow: hidden;
+                            }
+
+                            .journal-header-table td {
+                            border: 1px solid #e1e1e1;
+                            padding: 10px 12px;
+                            font-size: 15px;
+                            vertical-align: middle;
+                            }
+
+                            .journal-header-table strong {
+                            color: #000;
+                            font-weight: 600;
+                            }
+
+                            /* ===== Lines Table ===== */
+                            .journal-lines-table {
+                            width: 100%;
+                            border-collapse: separate;
+                            border-spacing: 0;
+                            border: 1px solid #E74C1A;
+                            border-radius: 10px;
+                            overflow: hidden;
+                            margin-top: 20px;
+                            font-size: 15px;
+                            }
+
+                            .journal-lines-table th {
+                            background-color: #E74C1A;
+                            color: white;
+                            text-transform: uppercase;
+                            padding: 12px 10px;
+                            border: 1px solid #E74C1A;
+                            text-align: left;
+                            font-size: 16px;
+                            font-weight: 600;
+                            }
+
+                            .journal-lines-table td {
+                            border: 1px solid #f0f0f0;
+                            padding: 10px 12px;
+                            vertical-align: middle;
+                            }
+
+                            .journal-lines-table tr:nth-child(even) {
+                            background-color: #fafafa;
+                            }
+
+                            .text-end {
+                            text-align: right;
+                            }
+
+                            /* ===== Total Row ===== */
+                            .total-row td {
+                            border-top: 2px solid #E74C1A;
+                            font-weight: bold;
+                            background-color: #fff7f5;
+                            font-size: 16px;
+                            }
+
+                            /* ===== Rounded Corners Fix ===== */
+                            .journal-lines-table,
+                            .journal-header-table {
+                            -webkit-border-radius: 10px;
+                            -moz-border-radius: 10px;
+                            border-radius: 10px;
+                            }
+
+                            /* ===== Optional Shadow for PDF elegance ===== */
+                            .journal-lines-table {
+                            box-shadow: 0px 3px 6px rgba(0, 0, 0, 0.1);
+                            }
+                        </style>
+
+                        <!-- ===== Title ===== -->
                         <div>
-                            <h2 class="text-center mb32">
-                                <strong>Journal Entry</strong>
-                            </h2>
+                            <h2 class="journal-entry-title">Journal Entry</h2>
                         </div>
-                        <br/>
-                        <table style="width:100%;margin:0px auto;background:white;border:1px solid #e1e1e1;"
-                               class="table table-condensed">
+
+                        <!-- ===== Top Info Table ===== -->
+                        <table class="journal-header-table">
                             <tbody>
                                 <tr>
                                     <td>
@@ -47,236 +143,72 @@
                                     <td>
                                         <strong>Reference :</strong>
                                     </td>
-                                    <td>
+                                    <td colspan="3">
                                         <p t-field="o.ref"/>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
+
                         <br/>
 
-                        <t t-set="display_tax" t-value="any(l.tax_ids for l in o.line_ids)"/>
+                        <!-- ===== Journal Lines ===== -->
                         <t t-set="display_partner" t-value="any(l.partner_id for l in o.line_ids)"/>
-                        <t t-set="display_analytic" t-value="any(l.analytic_distribution for l in o.line_ids)"/>
-                        <t t-set="display_date_maturity" t-value="any(l.date_maturity for l in o.line_ids)"/>
-                        <t t-set="display_discount" t-value="any(l.discount_amount_currency for l in o.line_ids)"/>
-                        <t t-set="display_amount_currency"
-                           t-value="any(l.amount_currency and l.currency_id != l.company_id.currency_id for l in o.line_ids)"/>
-                        <div class="oe_structure"/>
 
-                        <table class="table table-sm o_main_table table-borderless" name="invoice_line_table">
+                        <table class="journal-lines-table">
                             <thead>
                                 <tr>
-                                    <th name="th_account" class="text-start">
-                                        <span>Account</span>
-                                    </th>
-                                    <th name="th_partner" t-if="display_partner" class="text-start">
-                                        <span>Partner</span>
-                                    </th>
-                                    <th name="th_label" class="text-start">
-                                        <span>Label</span>
-                                    </th>
-                                    <th name="th_due_date" t-if="display_date_maturity" class="text-start">
-                                        <span>Due Date</span>
-                                    </th>
-                                    <!--                                    <th name="th_analytic" t-if="display_analytic" class="text-start"><span>Analytic</span></th>-->
-                                    <th name="th_amount_currency" t-if="display_amount_currency"
-                                        t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span>Amount Currency</span>
-                                    </th>
-                                    <th name="th_discount" t-if="display_discount"
-                                        t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span>Disc Amount</span>
-                                    </th>
-                                    <th name="th_analytic" t-if="display_analytic" class="text-end">
-                                        <span>Analytic Account</span>
-                                    </th>
-                                    <th name="th_taxes" t-if="display_tax"
-                                        t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span>Taxes</span>
-                                    </th>
-                                    <th name="th_debit"
-                                        t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span>Debit</span>
-                                    </th>
-                                    <th name="th_credit"
-                                        t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                        <span>Credit</span>
-                                    </th>
+                                    <th>Account</th>
+                                    <th t-if="display_partner">Partner</th>
+                                    <th>Label</th>
+                                    <th class="text-end">Debit</th>
+                                    <th class="text-end">Credit</th>
                                 </tr>
                             </thead>
-                            <tbody class="invoice_tbody">
+                            <tbody>
                                 <t t-set="current_debit" t-value="0"/>
                                 <t t-set="current_credit" t-value="0"/>
-                                <t t-set="lines"
-                                   t-value="o.line_ids.sorted(key=lambda l: (-l.sequence, l.date, l.move_name, -l.id), reverse=True)"/>
 
-                                <t t-foreach="lines" t-as="line">
+                                <t t-foreach="o.line_ids" t-as="line">
                                     <t t-set="current_debit" t-value="current_debit + line.debit"/>
                                     <t t-set="current_credit" t-value="current_credit + line.credit"/>
 
-                                    <tr class="'bg-200 fw-bold">
-                                        <t name="account_invoice_line_accountable">
-                                            <td name="account_invoice_line_name">
-                                                <span t-field="line.account_id"/>
-                                            </td>
-                                            <td t-if="display_partner" name="td_partner" class="text-start">
-                                                <span t-field="line.partner_id"/>
-                                            </td>
-                                            <td name="td_label" class="text-start">
-                                                <span t-field="line.name"/>
-                                            </td>
-                                            <td t-if="display_date_maturity" name="td_date_maturity" class="text-start">
-                                                <span t-field="line.date_maturity"
-                                                      t-options="{&quot;widget&quot;: &quot;date&quot;}"/>
-                                            </td>
-
-                                            <td name="td_amount_currency" t-if="display_amount_currency"
-                                                t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                                <span class="text-nowrap" t-field="line.amount_currency"/>
-                                            </td>
-                                            <td name="td_discount" t-if="display_discount"
-                                                t-attf-class="text-end {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                                <span class="text-nowrap" t-field="line.discount_amount_currency">
-                                                </span>
-                                            </td>
-                                            <td name="td_analytic" t-if="display_analytic" class="text-start">
-                                                <span>
-                                                    <div t-foreach="line.analytic_distribution" t-as="distribution">
-                                                        <div t-foreach="distribution.split(',')" t-as="d">
-                                                            <t t-esc="line.env['account.analytic.account'].browse(int(d))[0].name"/>
-                                                            :
-                                                            <t t-esc="line.analytic_distribution.get(distribution)"/>
-                                                        </div>
-                                                    </div>
-                                                </span>
-                                            </td>
-                                            <td name="td_taxes" t-if="display_tax"
-                                                t-attf-class="text-start {{ 'd-none d-md-table-cell' if report_type == 'html' else '' }}">
-                                                <span t-out="', '.join(map(lambda x: (x.name), line.tax_ids))"
-                                                      id="line_tax_ids">Tax 15%
-                                                </span>
-                                            </td>
-                                            <td name="td_debit" class="text-end">
-                                                <span class="text-nowrap" t-field="line.debit">0.00</span>
-                                            </td>
-                                            <td name="td_credit" class="text-end">
-                                                <span class="text-nowrap" t-field="line.credit">0.00</span>
-                                            </td>
-                                        </t>
+                                    <tr>
+                                        <td>
+                                            <span t-field="line.account_id"/>
+                                        </td>
+                                        <td t-if="display_partner">
+                                            <span t-field="line.partner_id"/>
+                                        </td>
+                                        <td>
+                                            <span t-field="line.name"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.debit"/>
+                                        </td>
+                                        <td class="text-end">
+                                            <span t-field="line.credit"/>
+                                        </td>
                                     </tr>
                                 </t>
-                                <tr>
-                                    <t t-set="colspan_no" t-value="2"/>
-                                    <t t-if="display_tax" t-set="colspan_no" t-value="colspan_no+1"/>
-                                    <t t-if="display_date_maturity" t-set="colspan_no" t-value="colspan_no+1"/>
-                                    <t t-if="display_partner" t-set="colspan_no" t-value="colspan_no+1"/>
-                                    <t t-if="display_discount" t-set="colspan_no" t-value="colspan_no+1"/>
-                                    <t t-if="display_analytic" t-set="colspan_no" t-value="colspan_no+1"/>
-                                    <t t-if="display_amount_currency" t-set="colspan_no" t-value="colspan_no+1"/>
-                                    <td t-att-colspan="colspan_no" style="border-top: 1px solid black;"
-                                        class="fw-bold text-end">Total
-                                    </td>
-                                    <td name="td_total_debit" style="border-top: 1px solid black;" class="text-end">
+
+                                <tr class="total-row">
+                                    <td colspan="3" class="text-end">Total</td>
+                                    <td class="text-end">
                                         <strong>
-                                            <span class="text-nowrap" t-out="current_debit"
-                                                  t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}">
-                                                0.00
-                                            </span>
+                                            <span t-out="current_debit"
+                                                  t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
                                         </strong>
                                     </td>
-                                    <td name="td_total_credit" style="border-top: 1px solid black;" class="text-end">
+                                    <td class="text-end">
                                         <strong>
-                                            <span class="text-nowrap" t-out="current_credit"
-                                                  t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}">
-                                                0.00
-                                            </span>
+                                            <span t-out="current_credit"
+                                                  t-options="{&quot;widget&quot;: &quot;monetary&quot;, &quot;display_currency&quot;: o.currency_id}"/>
                                         </strong>
                                     </td>
                                 </tr>
                             </tbody>
                         </table>
-
-                        <!--				<table style="width:100%;margin:0px auto;background:white;border:1px solid #e1e1e1;" class="table table-condensed">-->
-                        <!--					<thead>-->
-                        <!--						<tr>-->
-
-                        <!--							<th>Account</th>-->
-                        <!--							<th>Partner</th>-->
-                        <!--							<th>Label</th>-->
-                        <!--							<th>Due Date</th>-->
-                        <!--							<th>Analytic Account</th>-->
-                        <!--							<th>Taxes(%)</th>-->
-                        <!--							<th>Debit</th>-->
-                        <!--							<th>Credit</th>-->
-                        <!--						</tr>-->
-                        <!--					</thead>  -->
-                        <!--					<tbody class="consumed_tbody">-->
-                        <!--						<t t-set="total" t-value="0.0"/>-->
-                        <!--						<t t-set="total1" t-value="0.0"/>-->
-                        <!--						<t t-foreach="o.line_ids" t-as="line">    -->
-                        <!--						<tr>-->
-
-                        <!--							<td>-->
-                        <!--								<span t-field="line.account_id" />-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span t-field="line.partner_id" />-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span t-field="line.name" />-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span t-field="line.date_maturity" />-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span>-->
-                        <!--									<div t-foreach="line.analytic_distribution" t-as="distribution">-->
-                        <!--										<t t-set="distributions" t-value="distribution.split(',')"/>-->
-                        <!--										<t t-foreach="distributions" t-as="dist">-->
-                        <!--											<t t-if="line.env['account.analytic.account'].browse(int(dist))[0].partner_id">-->
-                        <!--												<t t-esc="line.env['account.analytic.account'].browse(int(dist))[0].name"/>- -->
-                        <!--												<t t-esc="line.env['account.analytic.account'].browse(int(dist))[0].partner_id.name"/>, -->
-                        <!--												<t t-esc="line.analytic_distribution.get(dist)"/>-->
-                        <!--											</t>-->
-                        <!--											<t t-else="">-->
-                        <!--												<t t-esc="line.env['account.analytic.account'].browse(int(dist))[0].name"/>,-->
-                        <!--												<t t-esc="line.analytic_distribution.get(dist)"/>-->
-                        <!--											</t>-->
-                        <!--											<br/>-->
-                        <!--										</t>-->
-                        <!--									</div>-->
-                        <!--								</span>-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span t-field="line.tax_ids" />-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span t-field="line.debit" />-->
-                        <!--							</td>-->
-                        <!--							<td>-->
-                        <!--								<span t-field="line.credit" />-->
-                        <!--							</td>-->
-                        <!--						</tr>-->
-                        <!--						<t t-set="total" t-value="total + line.debit"/>-->
-                        <!--						<t t-set="total1" t-value="total1 + line.credit"/>-->
-                        <!--						</t>-->
-                        <!--						<tr>-->
-                        <!--							<td></td>-->
-                        <!--							<td></td>-->
-                        <!--							<td></td>-->
-                        <!--							<td></td>-->
-                        <!--							<td></td>-->
-                        <!--							<td><strong>Total:</strong></td>-->
-                        <!--							<td width="10%"><strong>-->
-                        <!--								<span><t t-esc="total"/></span>-->
-                        <!--							</strong></td>-->
-                        <!--							 <td width="10%"><strong>-->
-                        <!--								<span><t t-esc="total1"/></span>-->
-                        <!--							</strong></td>-->
-                        <!--					  	</tr>-->
-                        <!--					</tbody>-->
-                        <!--				</table>-->
                     </div>
                     <!--                    <div class="page" style="font-size:15px;">-->
                     <!--                        <div>-->
