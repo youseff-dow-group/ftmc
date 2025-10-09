@@ -1,0 +1,16 @@
+<odoo>
+    <record id="view_partner_form_custom" model="ir.ui.view">
+        <field name="name">res.partner.form.custom</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <!-- Replace the existing mobile field to remove phone widget -->
+            <field name="mobile" position="replace">
+                <field name="mobile"/>
+            </field>
+            <field name="phone" position="replace">
+                <field name="phone"/>
+            </field>
+        </field>
+    </record>
+</odoo>
