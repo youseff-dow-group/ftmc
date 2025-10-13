@@ -17,7 +17,7 @@
             <form>
                 <field name="product_list_ids"/>
                 <footer>
-                    <button name="action_add_line" string="Add to Lineddds" type="object" class="oe_highlight"/>
+                    <button name="action_add_line" string="Add to Lines" type="object" class="oe_highlight"/>
                     <button string="Cancel" class="btn btn-default" special="cancel"/>
                 </footer>
             </form>

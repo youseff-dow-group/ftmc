@@ -15,8 +15,6 @@
                         invisible="not sale_order_id"/>
             </xpath>
             <xpath expr="//field[@name='bom_line_ids']/tree//field[@name='product_id']" position="attributes">
-
-
                 <field name="product_id" context="{'default_detailed_type': 'product'}" required="0"/>
 
                 <!--                <control>-->
@@ -87,13 +85,45 @@
             <xpath expr="//field[@name='code']" position="after">
 
 
-                <field name="task_id" invisible="1"/>
-                <field name="sale_order_id" invisible="1"/>
-                <field name="sale_order_line_id" invisible="1"/>
-                <field name="sale_order_from_task_id" invisible="1"/>
+                <field name="task_id" invisible="0"/>
+                <field name="sale_order_id" invisible="0"/>
+                <field name="sale_order_line_id" invisible="0"/>
+                <field name="sale_order_from_task_id" invisible="0"/>
 
             </xpath>
 
+        </field>
+    </record>
+    <record id="mrp_production_form_view_inherit" model="ir.ui.view">
+        <field name="name">mrp.production.view.form.inherited</field>
+        <field name="model">mrp.production</field>
+        <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
+        <field name="arch" type="xml">
+
+            <xpath expr="//field[@name='product_id']" position="after">
+                <field name="available_component_ids" invisible="1"/>
+                <field name="related_component_id"/>
+            </xpath>
+
+            <xpath expr="//field[@name='move_byproduct_ids']/tree/field[@name='product_id']" position="after">
+                <field name="available_component_ids" column_invisible="1"/>
+                <field name="related_component_id" column_invisible="0"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='components']//field[@name='move_raw_ids']" position="before">
+                <button name="%(multiple_product_action_new)d"
+                        string="Add Products"
+                        type="action"
+                        context="{'add_type': 'raw'}"
+                        class="oe_highlight"/>
+            </xpath>
+            <xpath expr="//notebook/page[@name='finished_products']//field[@name='move_byproduct_ids']"
+                   position="before">
+                <button name="%(multiple_product_action_new)d"
+                        string="Add Products"
+                        type="action"
+                        context="{'add_type': 'finished'}"
+                        class="oe_highlight"/>
+            </xpath>
         </field>
     </record>
 </odoo>

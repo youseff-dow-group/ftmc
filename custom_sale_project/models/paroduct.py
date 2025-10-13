@@ -23,8 +23,8 @@ class ProductTemplate(models.Model):
                 return brand_products.name_get()
 
             # Or include brand in main search domain
-            domain = ['|', '|', '|', ('brand_id.name', operator, name),
-                      ('name', operator, name), ('description_sale', operator, name), ('default_code', operator, name)]
+            domain = ['|', '|', '|','|', ('brand_id.name', operator, name),
+                      ('name', operator, name), ('description_sale', operator, name), ('default_code', operator, name),('default_code', operator, name)]
             products = self.search(domain + args, limit=limit)
             return products.name_get()
 
@@ -66,8 +66,9 @@ class Productproduct(models.Model):
             if brand_products:
                 return brand_products.name_get()
 
-            domain = ['|', '|', '|', ('brand_id.name', operator, name),
-                      ('name', operator, name), ('description_sale', operator, name), ('default_code', operator, name)]
+            domain = ['|', '|', '|', '|', ('brand_id.name', operator, name),
+                      ('name', operator, name), ('description_sale', operator, name), ('default_code', operator, name),
+                      ('default_code', operator, name)]
             products = self.search(domain + args, limit=limit)
             return products.name_get()
 

@@ -1,12 +1,18 @@
 <odoo>
     <record id="view_picking_form_inherit_priceunit" model="ir.ui.view">
-    <field name="name">stock.picking.form.inherit.priceunit</field>
-    <field name="model">stock.picking</field>
-    <field name="inherit_id" ref="stock.view_picking_form"/>
-    <field name="arch" type="xml">
-        <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity']" position="after">
-            <field name="delivery_price_unit" string="Price Unit"/>
-        </xpath>
-    </field>
-</record>
+        <field name="name">stock.picking.form.inherit.priceunit</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity']" position="after">
+                <field name="delivery_price_unit" string="Price Unit" optional="show"/>
+                <field name="product_weight" readonly="1" optional="show"/>
+                <field name="actual_weight" readonly="1" optional="show"/>
+                <field name="net_weight" optional="show"/>
+                <field name="gross_weight" optional="show"/>
+                <field name="country_of_origin_ids" widget="many2many_tags" optional="show"/>
+                <field name="remarks" optional="show"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>

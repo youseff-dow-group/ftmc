@@ -8,3 +8,4 @@ from . import mrp_bom
 from . import paroduct
 from . import product_brand
 from . import stock_move
+from . import mrp_production

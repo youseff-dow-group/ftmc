@@ -6,6 +6,12 @@
         <field name="arch" type="xml">
             <field name="tax_ids" position="after">
                 <field name="discount_amount" readonly="1"/>
+                <field name="actual_weight" optional="show"/>
+                <field name="net_weight" optional="show"/>
+                <field name="gross_weight" optional="show"/>
+                <field name="country_of_origin_ids" widget="many2many_tags" optional="show"/>
+                <field name="remarks" optional="show"/>
+                <field name="hs_code" optional="show"/>
             </field>
             <xpath expr="//field[@name='invoice_date']" position="after">
                 <field name="picking_id" options="{'no_create': True}"/>
