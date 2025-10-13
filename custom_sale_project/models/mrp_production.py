@@ -16,8 +16,10 @@ class MrpProduction(models.Model):
         compute='_compute_available_component_ids',
         store=False
     )
+    picking_id = fields.Many2one('stock.picking', string='Related Delivery Order', readonly=True)
 
-    @api.depends('move_raw_ids')
+
+    @api.depends('move_raw_ids','product_id')
     def _compute_available_component_ids(self):
         """Compute all available raw material products for domain."""
         for production in self:

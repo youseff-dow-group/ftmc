@@ -100,9 +100,15 @@
         <field name="inherit_id" ref="mrp.mrp_production_form_view"/>
         <field name="arch" type="xml">
 
+
+
             <xpath expr="//field[@name='product_id']" position="after">
                 <field name="available_component_ids" invisible="1"/>
                 <field name="related_component_id"/>
+            </xpath>
+              <xpath expr="//field[@name='move_byproduct_ids']/tree/field[@name='product_id']" position="attributes">
+                <attribute name="context">{'active_model': 'mrp.production', 'active_id': active_id}
+                </attribute>
             </xpath>
 
             <xpath expr="//field[@name='move_byproduct_ids']/tree/field[@name='product_id']" position="after">

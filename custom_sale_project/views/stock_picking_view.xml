@@ -4,6 +4,14 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//header" position="inside">
+                <button name="action_create_mo_from_unavailable_products"
+                        string="Create MO (Unavailable Products)"
+                        type="object"
+                        class="oe_highlight"
+                        invisible="state != 'assigned'"
+                />
+            </xpath>
             <xpath expr="//field[@name='move_ids_without_package']/tree/field[@name='quantity']" position="after">
                 <field name="delivery_price_unit" string="Price Unit" optional="show"/>
                 <field name="product_weight" readonly="1" optional="show"/>

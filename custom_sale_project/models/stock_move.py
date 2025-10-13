@@ -62,13 +62,26 @@ class StockMove(models.Model):
         store=False
     )
 
+    @api.onchange('product_id')
+    def _onchange_product_id_update_components(self):
+        """When selecting a product, update available components from the MO."""
+        for move in self:
+            production = move.production_id or move.raw_material_production_id
+            if not production and self.env.context.get('active_model') == 'mrp.production':
+                active_id = self.env.context.get('default_production_id')
+                if active_id:
+                    production = self.env['mrp.production'].browse(active_id)
+            if production:
+                move.available_component_ids = production.move_raw_ids.mapped('product_id')
+            else:
+                move.available_component_ids = self.env['product.product']
+
     @api.depends('production_id', 'raw_material_production_id')
     def _compute_available_component_ids(self):
         """Compute available raw material products for use in the domain."""
         for move in self:
             production = move.production_id or move.raw_material_production_id
             if production:
-                # Collect all component products from move_raw_ids
                 component_products = production.move_raw_ids.mapped('product_id')
                 move.available_component_ids = component_products
             else:
